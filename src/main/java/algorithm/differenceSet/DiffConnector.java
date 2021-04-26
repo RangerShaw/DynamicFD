@@ -25,7 +25,7 @@ public class DiffConnector {
 
         differenceSet.generateDiffSets(pliClass.getInversePli());
 
-        return differenceSet.getDiffSets();
+        return differenceSet.getDiffSet();
     }
 
     public List<BitSet> generatePliAndDiff(List<List<String>> data, String diffFp) {
@@ -34,14 +34,12 @@ public class DiffConnector {
 
         pliClass.generatePLI(data);
 
-        differenceSet.generateDiffSets(pliClass.getInversePli(), diffFp);
-
-        return differenceSet.getDiffSets();
+        return differenceSet.generateDiffSets(pliClass.getInversePli(), diffFp);
     }
 
 
     public List<BitSet> getDiffSets() {
-        return differenceSet.getDiffSets();
+        return differenceSet.getDiffSet();
     }
 
     public List<BitSet> insertData(List<List<String>> insertedData) {

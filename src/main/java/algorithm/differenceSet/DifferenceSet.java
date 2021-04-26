@@ -15,7 +15,7 @@ public class DifferenceSet {
 
     int nTuples;
 
-    Map<BitSet, Integer> diffSets = new HashMap<>();
+    List<BitSet> diffSet = new ArrayList<>();
 
     HashIntIntMap dfFreq = HashIntIntMaps.newMutableMap();
 
@@ -28,81 +28,90 @@ public class DifferenceSet {
         nAttributes = inversePli.isEmpty() ? 0 : inversePli.get(0).size();
     }
 
-    public Set<BitSet> generateDiffSets(List<List<Integer>> inversePli) {
+    public List<BitSet> generateDiffSets(List<List<Integer>> inversePli) {
         initiateDataStructure(inversePli);
 
+        Map<BitSet, Integer> diffSetMap = new HashMap<>();
         for (int t1 = 0; t1 < nTuples - 1; t1++) {
             for (int t2 = t1 + 1; t2 < nTuples; t2++) {
                 BitSet diffSet = new BitSet(nAttributes);
                 for (int e = 0; e < nAttributes; e++)
                     if (!inversePli.get(t1).get(e).equals(inversePli.get(t2).get(e)))
                         diffSet.set(e);
-                diffSets.put(diffSet, diffSets.getOrDefault(diffSet, 0) + 1);
+                diffSetMap.put(diffSet, diffSetMap.getOrDefault(diffSet, 0) + 1);
             }
         }
 
-        for (Map.Entry<BitSet, Integer> df : diffSets.entrySet())
+        diffSet.addAll(diffSetMap.keySet());
+
+        for (Map.Entry<BitSet, Integer> df : diffSetMap.entrySet())
             dfFreq.addValue(Utils.bitsetToInt(nAttributes, df.getKey()), df.getValue());
 
-        return diffSets.keySet();
+        return new ArrayList<>(diffSet);
     }
 
-    public Set<BitSet> generateDiffSets(List<List<Integer>> inversePli, String diffFp) {
+    public List<BitSet> generateDiffSets(List<List<Integer>> inversePli, String diffFp) {
         initiateDataStructure(inversePli);
 
-        diffSets = DataIO.readDiffSetsMap(diffFp);
+        Map<BitSet, Integer> diffSetMap = DataIO.readDiffSetsMap(diffFp);
 
-        for (Map.Entry<BitSet, Integer> df : diffSets.entrySet())
+        diffSet.addAll(diffSetMap.keySet());
+
+        for (Map.Entry<BitSet, Integer> df : diffSetMap.entrySet())
             dfFreq.addValue(Utils.bitsetToInt(nAttributes, df.getKey()), df.getValue());
 
-        return diffSets.keySet();
+        return new ArrayList<>(diffSet);
     }
 
     public List<BitSet> insertData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli) {
         int[] dfHashCodes = new int[inversePli.size()];
-        boolean[][] diffSetsBools = new boolean[inversePli.size()][nAttributes];
+        boolean[][] diffBools = new boolean[inversePli.size()][nAttributes];
 
         int initHash = 0;
         for (int i = 0; i < nAttributes; i++)
             initHash |= (1 << i);
 
         List<BitSet> newDiffSets = new ArrayList<>();
+
         for (int t = nTuples; t < inversePli.size(); t++) {
             // reset structures
             Arrays.fill(dfHashCodes, initHash);
             for (int i = 0; i < t; i++)
-                Arrays.fill(diffSetsBools[i], true);        // true iff different
+                Arrays.fill(diffBools[i], true);
 
             // update pli
             for (int e = 0; e < nAttributes; e++) {
                 List<List<Integer>> pliE = pli.get(e);
                 int clstId = inversePli.get(t).get(e);
-                if (clstId < pliE.size()) {                     // existing cluster
-                    int mask = ~(1 << (nAttributes - 1 - e));
+
+                if (clstId >= pliE.size())                      // new cluster
+                    pliE.add(new ArrayList<>());
+                else {
+                    int mask = ~(1 << (nAttributes - 1 - e));   // existing cluster
                     for (int neighbor : pliE.get(clstId)) {
-                        diffSetsBools[neighbor][e] = false;
+                        diffBools[neighbor][e] = false;
                         dfHashCodes[neighbor] &= mask;
                     }
-                } else {                                        // new cluster
-                    pliE.add(new ArrayList<>());
                 }
+
                 pliE.get(clstId).add(t);
             }
 
             // generate diff
             for (int i = 0; i < t; i++) {
                 if (dfFreq.addValue(dfHashCodes[i], 1, 0) == 1)
-                    newDiffSets.add(Utils.boolArrayToBitSet(diffSetsBools[i]));
+                    newDiffSets.add(Utils.boolArrayToBitSet(diffBools[i]));
             }
         }
 
+        diffSet.addAll(newDiffSets);
         nTuples = inversePli.size();
 
         return newDiffSets;
     }
 
-    public List<BitSet> getDiffSets() {
-        return new ArrayList<>(diffSets.keySet());
+    public List<BitSet> getDiffSet() {
+        return new ArrayList<>(diffSet);
     }
 
 //    void updateDiffSets3(List<List<List<Integer>>> pli, int nInsertedTuples,

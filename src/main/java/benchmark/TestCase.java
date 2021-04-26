@@ -53,10 +53,11 @@ public class TestCase {
         double runtime2 = (double) (System.nanoTime() - startTime2) / 1000000;
 
         // print runtime
-        System.out.println("Update PLI and DF runtime: \t" + runtime1 + "ms");
-        System.out.println("Update FD runtime: \t\t\t" + runtime2 + "ms");
-        System.out.println("Total runtime: \t\t\t\t" + (runtime1 + runtime2) + "ms");
-        System.out.println("Average runtime: \t\t\t" + (runtime1 + runtime2) / (CSV_INSERT_INPUT[dataset].length - 1) + "ms");
+        System.out.println("[Time]");
+        System.out.println("  Update PLI and Diff: \t" + runtime1 + "ms");
+        System.out.println("  Update FD: \t\t\t" + runtime2 + "ms");
+        System.out.println("  Total: \t\t\t\t" + (runtime1 + runtime2) + "ms");
+        System.out.println("  Average: \t\t\t\t" + (runtime1 + runtime2) / (CSV_INSERT_INPUT[dataset].length - 1) + "ms");
         System.out.println("--------------------------------------------------------");
     }
 
