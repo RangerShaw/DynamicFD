@@ -28,6 +28,10 @@ public class DiffConnector {
         return differenceSet.getDiffSet();
     }
 
+    /**
+     * read Diff Set from diffFp directly, generate all other structures as usual
+     * @param data input data, each tuple must be unique
+     */
     public List<BitSet> generatePliAndDiff(List<List<String>> data, String diffFp) {
         nTuples = data.size();
         nAttributes = data.isEmpty() ? 0 : data.get(0).size();
@@ -42,18 +46,20 @@ public class DiffConnector {
         return differenceSet.getDiffSet();
     }
 
+    /**
+     * @return new Diffs
+     */
     public List<BitSet> insertData(List<List<String>> insertedData) {
         pliClass.insertData(insertedData);
         return differenceSet.insertData(pliClass.getPli(), pliClass.getInversePli());
     }
 
-//    public List<BitSet> insertData(List<List<String>> insertedData) {
-//        List<Set<Integer>> updatedClusters = new ArrayList<>();
-//        List<Integer> insertedClusters = new ArrayList<>();
-//
-//        pliClass.insertData(insertedData, updatedClusters, insertedClusters);
-//
-//        return differenceSet.insertData(pliClass.getPli(), insertedData.size(), updatedClusters, insertedClusters);
-//    }
+    /**
+     * @return remain Diffs
+     */
+    public List<BitSet> removeData(List<Integer> removedData) {
+        pliClass.removeData(removedData);
+        return differenceSet.removeData(pliClass.getPli(), pliClass.getInversePli());
+    }
 
 }

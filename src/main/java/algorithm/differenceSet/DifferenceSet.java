@@ -110,7 +110,11 @@ public class DifferenceSet {
         return newDiffSets;
     }
 
-    public List<BitSet> getDiffSet() {
+    public List<BitSet> removeData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli) {
+        return new ArrayList<>();
+    }
+
+        public List<BitSet> getDiffSet() {
         return new ArrayList<>(diffSet);
     }
 

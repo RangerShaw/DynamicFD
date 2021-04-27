@@ -74,7 +74,7 @@ public class PliClass {
         return pli;
     }
 
-    List<List<List<Integer>>> getPli() {
+    public List<List<List<Integer>>> getPli() {
         return pli;
     }
 
@@ -82,7 +82,7 @@ public class PliClass {
         return inversePli;
     }
 
-    void insertData(List<List<String>> insertedData) {
+    public void insertData(List<List<String>> insertedData) {
         int offset = nTuples;
         nTuples += insertedData.size();
 
@@ -102,32 +102,7 @@ public class PliClass {
         }
     }
 
-
-//    void insertData(List<List<String>> insertedData, List<Set<Integer>> updatedClusters, List<Integer> insertedClusters) {
-//        int offset = nTuples;
-//        nTuples += insertedData.size();
-//        pli.stream().map(List::size).forEach(insertedClusters::add);
-//
-//        for (int e = 0; e < nAttributes; e++) {
-//            updatedClusters.add(new HashSet<>());
-//
-//            Map<String, Integer> pliMapE = pliMap.get(e);
-//            List<List<Integer>> pliE = pli.get(e);
-//            int cluster;
-//
-//            for (int t = 0; t < insertedData.size(); t++) {
-//                if (pliMapE.containsKey(insertedData.get(t).get(e))) {
-//                    cluster = pliMapE.get(insertedData.get(t).get(e));
-//                    updatedClusters.get(e).add(cluster);
-//                } else {
-//                    cluster = pliE.size();
-//                    pliMapE.put(insertedData.get(t).get(e), cluster);
-//                    pliE.add(new ArrayList<>());
-//                }
-//                pliE.get(cluster).add(t + offset);
-//            }
-//        }
-//    }
-
-
+    public void removeData(List<Integer> removedData) {
+        // pliMap remains unchanged, empty cluster remains there, remove data from inversePli
+    }
 }
