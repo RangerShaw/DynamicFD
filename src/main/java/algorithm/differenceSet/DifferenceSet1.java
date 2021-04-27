@@ -1,13 +1,13 @@
 package algorithm.differenceSet;
 
-import com.koloboke.collect.map.hash.HashIntIntMap;
-import com.koloboke.collect.map.hash.HashIntIntMaps;
-import util.DataIO;
-import util.Utils;
+        import com.koloboke.collect.map.hash.HashIntIntMap;
+        import com.koloboke.collect.map.hash.HashIntIntMaps;
+        import util.DataIO;
+        import util.Utils;
 
-import java.util.*;
+        import java.util.*;
 
-public class DifferenceSet {
+public class DifferenceSet1 {
 
     // TODO: int nNextTuple, avoid using the same tuple ID
 
@@ -20,15 +20,15 @@ public class DifferenceSet {
     HashIntIntMap dfFreq = HashIntIntMaps.newMutableMap();
 
 
-    public DifferenceSet() {
+    public DifferenceSet1() {
     }
 
-    void initiateDataStructure(List<List<Integer>> inversePli) {
+    void initiateDataStructure(List<Tuple> inversePli) {
         nTuples = inversePli.size();
-        nAttributes = inversePli.isEmpty() ? 0 : inversePli.get(0).size();
+        nAttributes = inversePli.isEmpty() ? 0 : inversePli.get(0).cells.length;
     }
 
-    public List<BitSet> generateDiffSets(List<List<Integer>> inversePli) {
+    public List<BitSet> generateDiffSets(List<Tuple> inversePli) {
         initiateDataStructure(inversePli);
 
         Map<BitSet, Integer> diffSetMap = new HashMap<>();
@@ -36,7 +36,7 @@ public class DifferenceSet {
             for (int t2 = t1 + 1; t2 < nTuples; t2++) {
                 BitSet diffSet = new BitSet(nAttributes);
                 for (int e = 0; e < nAttributes; e++)
-                    if (!inversePli.get(t1).get(e).equals(inversePli.get(t2).get(e)))
+                    if (inversePli.get(t1).get(e)!=inversePli.get(t2).get(e))
                         diffSet.set(e);
                 diffSetMap.put(diffSet, diffSetMap.getOrDefault(diffSet, 0) + 1);
             }
@@ -50,7 +50,7 @@ public class DifferenceSet {
         return new ArrayList<>(diffSet);
     }
 
-    public List<BitSet> generateDiffSets(List<List<Integer>> inversePli, String diffFp) {
+    public List<BitSet> generateDiffSets(List<Tuple> inversePli, String diffFp) {
         initiateDataStructure(inversePli);
 
         Map<BitSet, Integer> diffSetMap = DataIO.readDiffSetsMap(diffFp);
@@ -63,7 +63,7 @@ public class DifferenceSet {
         return new ArrayList<>(diffSet);
     }
 
-    public List<BitSet> insertData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli) {
+    public List<BitSet> insertData(List<List<List<Tuple>>> pli, List<Tuple> inversePli) {
         int[] dfHashCodes = new int[inversePli.size()];
         boolean[][] diffBools = new boolean[inversePli.size()][nAttributes];
 
@@ -81,20 +81,20 @@ public class DifferenceSet {
 
             // update pli
             for (int e = 0; e < nAttributes; e++) {
-                List<List<Integer>> pliE = pli.get(e);
+                List<List<Tuple>> pliE = pli.get(e);
                 int clstId = inversePli.get(t).get(e);
 
                 if (clstId >= pliE.size())                      // new cluster
                     pliE.add(new ArrayList<>());
                 else {
                     int mask = ~(1 << (nAttributes - 1 - e));   // existing cluster
-                    for (int neighbor : pliE.get(clstId)) {
-                        diffBools[neighbor][e] = false;
-                        dfHashCodes[neighbor] &= mask;
+                    for (Tuple neighbor : pliE.get(clstId)) {
+                        diffBools[neighbor.pos][e] = false;
+                        dfHashCodes[neighbor.pos] &= mask;
                     }
                 }
 
-                pliE.get(clstId).add(t);
+                pliE.get(clstId).add(inversePli.get(t));
             }
 
             // generate diff

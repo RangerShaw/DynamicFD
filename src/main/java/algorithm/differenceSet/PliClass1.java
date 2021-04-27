@@ -1,9 +1,11 @@
 package algorithm.differenceSet;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class PliClass {
+public class PliClass1 {
 
     public int nTuples;
 
@@ -19,24 +21,19 @@ public class PliClass {
      * pli[i][j]: on attribute[i], what tuples belong to cluster[j];
      * pli[i][j][k]: tuple index
      */
-    List<List<List<Integer>>> pli = new ArrayList<>();
+    List<List<List<Tuple>>> pli = new ArrayList<>();
 
     /**
-     * inversePli[t][e]: inverse mapping tuple t on attribute e to its cluster ID
+     * inversePli[t]: inverse mapping of each cell in tuple t to its cluster ID
      */
-    List<List<Integer>> inversePli = new ArrayList<>();
+    List<Tuple> inversePli = new ArrayList<>();
 
     /**
      * next cluster IDs for new clusters on each attribute
      */
     int[] nextClusterId;
 
-    /**
-     * next tuple ID for new data, to avoid collision
-     */
-    int nextTupleId;
-
-    public PliClass() {
+    public PliClass1() {
     }
 
     void initiateDataStructure(List<List<String>> data) {
@@ -50,15 +47,15 @@ public class PliClass {
             pliMap.add(new HashMap<>());
         }
         for (int t = 0; t < nTuples; t++)
-            inversePli.add(new ArrayList<>(nAttributes));
+            inversePli.add(new Tuple(nAttributes, inversePli.size()));
     }
 
-    List<List<List<Integer>>> generatePLI(List<List<String>> data) {
+    List<List<List<Tuple>>> generatePLI(List<List<String>> data) {
         initiateDataStructure(data);
 
         for (int e = 0; e < nAttributes; e++) {
             Map<String, Integer> pliMapE = pliMap.get(e);
-            List<List<Integer>> pliE = pli.get(e);
+            List<List<Tuple>> pliE = pli.get(e);
 
             for (int t = 0; t < data.size(); t++) {
                 Integer clstId = pliMapE.get(data.get(t).get(e));
@@ -68,29 +65,27 @@ public class PliClass {
                     pliE.add(new ArrayList<>());
                 }
 
-                pliE.get(clstId).add(t);
-                inversePli.get(t).add(clstId);
+                pliE.get(clstId).add(inversePli.get(t));
+                inversePli.get(t).cells[e] = clstId;
             }
 
             nextClusterId[e] = pliE.size();
         }
 
-        nextTupleId = nTuples;
-
         return pli;
     }
 
-    public List<List<List<Integer>>> getPli() {
+    public List<List<List<Tuple>>> getPli() {
         return pli;
     }
 
-    public List<List<Integer>> getInversePli() {
+    public List<Tuple> getInversePli() {
         return inversePli;
     }
 
     public void insertData(List<List<String>> insertedData) {
         for (int i = 0; i < insertedData.size(); i++)
-            inversePli.add(new ArrayList<>());
+            inversePli.add(new Tuple(nAttributes, inversePli.size()));
 
         // pli is untouched and will be updated in DifferenceSet
         for (int e = 0; e < nAttributes; e++) {
@@ -100,12 +95,11 @@ public class PliClass {
                     clstId = nextClusterId[e]++;
                     pliMap.get(e).put(insertedData.get(t).get(e), clstId);
                 }
-                inversePli.get(t + nTuples).add(clstId);
+                inversePli.get(t + nTuples).cells[e] = clstId;
             }
         }
 
         nTuples += insertedData.size();
-        nextTupleId += insertedData.size();
     }
 
     public void removeData(List<Integer> removedTupleIdList) {
