@@ -26,10 +26,6 @@ public class PliClass {
      */
     List<List<Integer>> inversePli = new ArrayList<>();
 
-    /**
-     * next tuple ID for new data, to avoid collision
-     */
-    int nextTupleId;
 
     public PliClass() {
     }
@@ -66,8 +62,6 @@ public class PliClass {
             }
         }
 
-        nextTupleId = nTuples;
-
         return pli;
     }
 
@@ -96,12 +90,12 @@ public class PliClass {
         }
 
         nTuples += insertedData.size();
-        nextTupleId += insertedData.size();
     }
 
     public void removeData(List<Integer> removedTuples, boolean[] removed) {
         int[] newId = new int[inversePli.size()];
 
+        // update inversePli, generate newId for remaining tuples
         removedTuples.add(removedTuples.size(), inversePli.size());
         for (int i = 0; i < removedTuples.size() - 1; i++) {
             int l = removedTuples.get(i), r = removedTuples.get(i + 1);
@@ -116,6 +110,7 @@ public class PliClass {
 
         inversePli.subList(inversePli.size() - removedTuples.size(), inversePli.size()).clear();
 
+        // update pli
         for (List<List<Integer>> pliE : pli) {
             for (List<Integer> clst : pliE) {
                 clst.removeIf(i -> removed[i]);
