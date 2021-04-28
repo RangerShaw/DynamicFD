@@ -1,20 +1,21 @@
 package algorithm.differenceSet;
 
-import java.util.*;
+import java.util.BitSet;
+import java.util.List;
 
-public class DiffConnector {
+public class DiffConnector1 {
 
     public int nTuples;
 
     public int nAttributes;
 
-    PliClass pliClass;
+    PliClass1 pliClass;
 
-    DifferenceSet differenceSet;
+    DifferenceSet1 differenceSet;
 
-    public DiffConnector() {
-        pliClass = new PliClass();
-        differenceSet = new DifferenceSet();
+    public DiffConnector1() {
+        pliClass = new PliClass1();
+        differenceSet = new DifferenceSet1();
     }
 
     public List<BitSet> generatePliAndDiff(List<List<String>> data) {
@@ -58,9 +59,8 @@ public class DiffConnector {
      * @return remain Diffs
      */
     public List<BitSet> removeData(List<Integer> removedData) {
-        removedData.sort(Integer::compareTo);
         pliClass.removeData(removedData);
-        return differenceSet.removeData(pliClass.getPli(), pliClass.getInversePli(), removedData);
+        return differenceSet.removeData(pliClass.getPli(), pliClass.getInversePli());
     }
 
 }

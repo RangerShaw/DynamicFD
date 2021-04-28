@@ -92,7 +92,7 @@ public class PliClass {
         for (int i = 0; i < insertedData.size(); i++)
             inversePli.add(new ArrayList<>());
 
-        // pli is untouched and will be updated in DifferenceSet
+        // update pliMap and inversePli, pli will be updated in DifferenceSet
         for (int e = 0; e < nAttributes; e++) {
             for (int t = 0; t < insertedData.size(); t++) {
                 Integer clstId = pliMap.get(e).get(insertedData.get(t).get(e));
@@ -110,5 +110,9 @@ public class PliClass {
 
     public void removeData(List<Integer> removedTupleIdList) {
         // pliMap remains unchanged, empty cluster remains there, remove data from inversePli
+//        for (int t : removedTupleIdList) {
+//            inversePli.set(t, null);
+//        }
+        nTuples -= removedTupleIdList.size();
     }
 }

@@ -1,6 +1,7 @@
 package benchmark;
 
 import algorithm.differenceSet.DiffConnector;
+import algorithm.differenceSet.DiffConnector1;
 import algorithm.hittingSet.fdConnectors.BhmmcsFdConnector;
 import util.DataIO;
 

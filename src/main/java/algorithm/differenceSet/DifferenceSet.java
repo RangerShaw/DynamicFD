@@ -2,6 +2,8 @@ package algorithm.differenceSet;
 
 import com.koloboke.collect.map.hash.HashIntIntMap;
 import com.koloboke.collect.map.hash.HashIntIntMaps;
+import com.koloboke.collect.set.hash.HashIntSet;
+import com.koloboke.collect.set.hash.HashIntSets;
 import util.DataIO;
 import util.Utils;
 
@@ -71,7 +73,7 @@ public class DifferenceSet {
         for (int i = 0; i < nAttributes; i++)
             initHash |= (1 << i);
 
-        List<BitSet> newDiffSets = new ArrayList<>();
+        List<BitSet> newDiffs = new ArrayList<>();
 
         for (int t = nTuples; t < inversePli.size(); t++) {
             // reset structures
@@ -100,17 +102,62 @@ public class DifferenceSet {
             // generate diff
             for (int i = 0; i < t; i++) {
                 if (dfFreq.addValue(dfHashCodes[i], 1, 0) == 1)
-                    newDiffSets.add(Utils.boolArrayToBitSet(diffBools[i]));
+                    newDiffs.add(Utils.boolArrayToBitSet(diffBools[i]));
             }
         }
 
-        diffSet.addAll(newDiffSets);
+        diffSet.addAll(newDiffs);
         nTuples = inversePli.size();
 
-        return newDiffSets;
+        return newDiffs;
     }
 
-    public List<BitSet> removeData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli) {
+    public List<BitSet> removeData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli, List<Integer> removedData) {
+        int[] dfHashCodes = new int[inversePli.size()];
+        boolean[][] diffBools = new boolean[inversePli.size()][nAttributes];
+        HashIntSet removedTupleSet = HashIntSets.newMutableSet(removedData);
+
+        int initHash = 0;
+        for (int i = 0; i < nAttributes; i++)
+            initHash |= (1 << i);
+
+        Set<BitSet> removedDiffs = new HashSet<>();
+
+        for (int t : removedData) {
+            // reset structures
+            Arrays.fill(dfHashCodes, initHash);
+            for (int i = 0; i < diffBools.length; i++)
+                Arrays.fill(diffBools[i], true);
+
+            // update pli
+            for (int e = 0; e < nAttributes; e++) {
+                List<List<Integer>> pliE = pli.get(e);
+                int clstId = inversePli.get(t).get(e);
+
+                if (clstId >= pliE.size())                      // new cluster
+                    pliE.add(new ArrayList<>());
+                else {
+                    int mask = ~(1 << (nAttributes - 1 - e));   // existing cluster
+                    for (int neighbor : pliE.get(clstId)) {
+                        diffBools[neighbor][e] = false;
+                        dfHashCodes[neighbor] &= mask;
+                    }
+                }
+
+                pliE.get(clstId).add(t);
+            }
+
+            // update inversePli
+            inversePli.set(t, null);
+
+            // generate diff
+            for (int i = 0; i < dfHashCodes.length; i++) {
+                if (inversePli.get(i) != null)
+                    if (dfFreq.addValue(dfHashCodes[i], -1) == 0)
+                        removedDiffs.add(Utils.boolArrayToBitSet(diffBools[i]));
+            }
+        }
+
         return new ArrayList<>();
     }
 

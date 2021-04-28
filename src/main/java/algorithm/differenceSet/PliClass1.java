@@ -42,7 +42,7 @@ public class PliClass1 {
 
         nextClusterId = new int[nAttributes];
 
-        for (int i = 0; i < nAttributes; i++) {
+        for (int e = 0; e < nAttributes; e++) {
             pli.add(new ArrayList<>());
             pliMap.add(new HashMap<>());
         }
@@ -102,7 +102,8 @@ public class PliClass1 {
         nTuples += insertedData.size();
     }
 
-    public void removeData(List<Integer> removedTupleIdList) {
+    public void removeData(List<Integer> removedTupleIds) {
         // pliMap remains unchanged, empty cluster remains there, remove data from inversePli
+
     }
 }
