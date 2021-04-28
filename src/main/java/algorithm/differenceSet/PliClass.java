@@ -27,11 +27,6 @@ public class PliClass {
     List<List<Integer>> inversePli = new ArrayList<>();
 
     /**
-     * next cluster IDs for new clusters on each attribute
-     */
-    int[] nextClusterId;
-
-    /**
      * next tuple ID for new data, to avoid collision
      */
     int nextTupleId;
@@ -42,8 +37,6 @@ public class PliClass {
     void initiateDataStructure(List<List<String>> data) {
         nTuples = data.size();
         nAttributes = data.isEmpty() ? 0 : data.get(0).size();
-
-        nextClusterId = new int[nAttributes];
 
         for (int i = 0; i < nAttributes; i++) {
             pli.add(new ArrayList<>());
@@ -71,8 +64,6 @@ public class PliClass {
                 pliE.get(clstId).add(t);
                 inversePli.get(t).add(clstId);
             }
-
-            nextClusterId[e] = pliE.size();
         }
 
         nextTupleId = nTuples;
@@ -97,7 +88,7 @@ public class PliClass {
             for (int t = 0; t < insertedData.size(); t++) {
                 Integer clstId = pliMap.get(e).get(insertedData.get(t).get(e));
                 if (clstId == null) {
-                    clstId = nextClusterId[e]++;
+                    clstId = pliMap.get(e).size();
                     pliMap.get(e).put(insertedData.get(t).get(e), clstId);
                 }
                 inversePli.get(t + nTuples).add(clstId);
@@ -108,11 +99,32 @@ public class PliClass {
         nextTupleId += insertedData.size();
     }
 
-    public void removeData(List<Integer> removedTupleIdList) {
-        // pliMap remains unchanged, empty cluster remains there, remove data from inversePli
-//        for (int t : removedTupleIdList) {
-//            inversePli.set(t, null);
-//        }
-        nTuples -= removedTupleIdList.size();
+    public void removeData(List<Integer> removedTuples, boolean[] removed) {
+        int[] newId = new int[inversePli.size()];
+
+        removedTuples.add(removedTuples.size(), inversePli.size());
+        for (int i = 0; i < removedTuples.size() - 1; i++) {
+            int l = removedTuples.get(i), r = removedTuples.get(i + 1);
+            newId[l] = -1;
+            for (int j = l + 1; j < r; j++) {
+                int currId = j - i - 1;
+                newId[j] = currId;
+                inversePli.set(currId, inversePli.get(j));
+            }
+        }
+        removedTuples.remove(removedTuples.size() - 1);
+
+        inversePli.subList(inversePli.size() - removedTuples.size(), inversePli.size()).clear();
+
+        for (List<List<Integer>> pliE : pli) {
+            for (List<Integer> clst : pliE) {
+                clst.removeIf(i -> removed[i]);
+                for (int i = 0; i < clst.size(); i++)
+                    if (clst.get(i) > removedTuples.get(0))
+                        clst.set(i, newId[clst.get(i)]);
+            }
+        }
+
+        nTuples -= removedTuples.size();
     }
 }
