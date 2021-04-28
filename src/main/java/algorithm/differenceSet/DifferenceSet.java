@@ -112,6 +112,9 @@ public class DifferenceSet {
         return newDiffs;
     }
 
+    /**
+     * @return remained Diffs
+     */
     public List<BitSet> removeData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli, List<Integer> removedData) {
         int[] dfHashCodes = new int[inversePli.size()];
         boolean[][] diffBools = new boolean[inversePli.size()][nAttributes];
@@ -158,7 +161,8 @@ public class DifferenceSet {
             }
         }
 
-        return new ArrayList<>();
+        diffSet.removeIf(removedDiffs::contains);
+        return new ArrayList<>(diffSet);
     }
 
     public List<BitSet> getDiffSet() {

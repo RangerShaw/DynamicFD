@@ -6,7 +6,9 @@ public class Benchmark {
         System.out.println("\n[WARNING] DO NOT TEST DATASET WITH WIDTH > 32 UNTIL FURTHER UPDATE\n");
 
         int dataset = 0;
-        TestCase.testInsert(dataset);
+
+        //TestCase.testInsert(dataset);
+        TestCase.testRemove(dataset);
     }
 
 }

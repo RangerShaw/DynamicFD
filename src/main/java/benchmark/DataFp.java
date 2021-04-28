@@ -9,9 +9,20 @@ public class DataFp {
     */
 
     // test INSERT
-    static String[][] CSV_INSERT_INPUT = new String[][]{
+    static String[] INSERT_BASE_DATA_INPUT = new String[]{
+            "dataFiles/letter/insert/letter_15000.csv"
+    };
+
+    static String[] INSERT_BASE_DIFF_INPUT = new String[]{
+            "dataFiles/letter/insert/letter_DS_15000.txt"
+    };
+
+    static String[] INSERT_BASE_FD_OUTPUT = new String[]{
+            "dataFiles/letter/insert/letter_FD_15000.txt"
+    };
+
+    static String[][] INSERT_NEW_DATA_INPUT = new String[][]{
             {
-                    "dataFiles/letter/insert/letter_15000.csv",
                     "dataFiles/letter/insert/letter_15000-16000.csv",
                     "dataFiles/letter/insert/letter_16000-17000.csv",
                     "dataFiles/letter/insert/letter_17000-18000.csv",
@@ -23,14 +34,8 @@ public class DataFp {
             }
     };
 
-    static String[] DIFF_INSERT_INPUT = new String[]{
-            "dataFiles/letter/insert/letter_DS_15000.txt"
-            // the next dataset file path
-    };
-
-    static String[][] FD_INSERT_OUTPUT = new String[][]{
+    static String[][] INSERT_NEW_FD_OUTPUT = new String[][]{
             {
-                    "dataFiles/letter/insert/letter_FD_15000.txt",
                     "dataFiles/letter/insert/letter_FD_16000.txt",
                     "dataFiles/letter/insert/letter_FD_17000.txt",
                     "dataFiles/letter/insert/letter_FD_18000.txt",
@@ -44,19 +49,35 @@ public class DataFp {
 
 
     // test REMOVE
-    static String[][] CSV_REMOVE_INPUT = new String[][]{
-            {
+    static String[] REMOVE_BASE_DATA_INPUT = new String[]{
+            "dataFiles/letter/remove/letter_20000.csv"
+    };
 
+    static String[] REMOVE_BASE_DIFF_INPUT = new String[]{
+            "dataFiles/letter/remove/letter_DS_20000.txt"
+    };
+    static String[] REMOVE_BASE_FD_OUTPUT = new String[]{
+            "dataFiles/letter/remove/letter_FD_20000.txt"
+    };
+
+    static String[][] REMOVE_DELETED_DATA_INPUT = new String[][]{
+            {
+                    "dataFiles/letter/remove/letter_19000-19999.csv",
+                    "dataFiles/letter/remove/letter_18000-18999.csv",
+                    "dataFiles/letter/remove/letter_17000-17999.csv",
+                    "dataFiles/letter/remove/letter_16000-16999.csv",
+                    "dataFiles/letter/remove/letter_15000-15999.csv",
             }
+            // the next dataset file path
     };
 
-    static String[] DIFF_REMOVE_INPUT = new String[]{
-
-    };
-
-    static String[][] FD_REMOVE_OUTPUT = new String[][]{
+    static String[][] REMOVE_DELETED_FD_OUTPUT = new String[][]{
             {
-
+                    "dataFiles/letter/remove/letter_FD_20000.txt",
+                    "dataFiles/letter/remove/letter_FD_19000.txt",
+                    "dataFiles/letter/remove/letter_FD_18000.txt",
+                    "dataFiles/letter/remove/letter_FD_17000.txt",
+                    "dataFiles/letter/remove/letter_FD_16000.txt"
             }
     };
 

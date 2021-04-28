@@ -25,6 +25,18 @@ public class DataIO {
         return content;
     }
 
+    public static List<Integer> readRemoveFile(String fp) {
+        List<Integer> res = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(fp))) {
+            String s;
+            while ((s = br.readLine()) != null)
+                res.add(Integer.parseInt(s));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return res;
+    }
+
     public static Map<BitSet, Integer> readDiffSetsMap(String dsFilePath) {
         List<String> lines = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(dsFilePath))) {
