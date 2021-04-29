@@ -13,6 +13,9 @@ import static benchmark.DataFp.*;
 public class TestCase {
 
     public static void testInsert(int dataset) {
+        List<Double> diffTimes = new ArrayList<>();
+        List<Double> fdTimes = new ArrayList<>();
+
         // load base data
         List<List<String>> csvData = DataIO.readCsvFile(INSERT_BASE_DATA_INPUT[dataset]);
 
@@ -25,42 +28,43 @@ public class TestCase {
         // initiate FD
         BhmmcsFdConnector fdConnector = new BhmmcsFdConnector(csvData.get(0).size());
         fdConnector.initiate(initDiffSets);
-        System.out.println("  # of initial FD: " + fdConnector.getMinFDs().get(0).size());
+        System.out.println("  # of initial FD: " + fdConnector.getMinFDs().stream().map(List::size).reduce(0, Integer::sum));
 
         // load inserted data all at once
-        List<List<List<String>>> insertData = new ArrayList<>();
-        for(String fp : INSERT_NEW_DATA_INPUT[dataset])
-            insertData.add(DataIO.readCsvFile(fp));
+        List<List<List<String>>> insertDatas = new ArrayList<>();
+        for (String fp : INSERT_NEW_DATA_INPUT[dataset])
+            insertDatas.add(DataIO.readCsvFile(fp));
 
         // update pli and differenceSet
         System.out.println("Updating PLI and DF: ");
-        long startTime1 = System.nanoTime();
         List<List<BitSet>> insertDiffSets = new ArrayList<>();
-        for (int i = 0; i < insertData.size(); i++) {
-            insertDiffSets.add(diffConnector.insertData(insertData.get(i)));
-            System.out.println("  " + i + ". # of New diff sets: " + insertDiffSets.get(i).size());
+        long startTime;
+        for (List<List<String>> insertData : insertDatas) {
+            startTime = System.nanoTime();
+            insertDiffSets.add(diffConnector.insertData(insertData));
+            diffTimes.add((double) (System.nanoTime() - startTime) / 1000000);
         }
-        double runtime1 = (double) (System.nanoTime() - startTime1) / 1000000;
+        insertDiffSets.forEach(ds -> System.out.println("  # of New diff sets: " + ds.size()));
 
         // update FD
         System.out.println("Updating FD: ");
-        long startTime2 = System.nanoTime();
-        for (int i = 0; i < insertDiffSets.size(); i++) {
-            fdConnector.insertSubsets(insertDiffSets.get(i));
-            System.out.println("  " + i + ". # of Fd: " + fdConnector.getMinFDs().get(0).size());
+        List<Integer> fdSizes = new ArrayList<>();
+        for (List<BitSet> insertDiffSet : insertDiffSets) {
+            startTime = System.nanoTime();
+            fdConnector.insertSubsets(insertDiffSet);
+            fdTimes.add((double) (System.nanoTime() - startTime) / 1000000);
+            fdSizes.add(fdConnector.getMinFDs().stream().map(List::size).reduce(0, Integer::sum));
         }
-        double runtime2 = (double) (System.nanoTime() - startTime2) / 1000000;
+        fdSizes.forEach(fd -> System.out.println("  # of FDs: " + fd));
 
         // print runtime
-        System.out.println("[Time]");
-        System.out.println("  Update PLI and Diff: \t" + runtime1 + "ms");
-        System.out.println("  Update FD: \t\t\t" + runtime2 + "ms");
-        System.out.println("  Total: \t\t\t\t" + (runtime1 + runtime2) + "ms");
-        System.out.println("  Average: \t\t\t\t" + (runtime1 + runtime2) / (INSERT_NEW_DATA_INPUT[dataset].length) + "ms");
-        System.out.println("--------------------------------------------------------");
+        printTime(diffTimes, fdTimes);
     }
 
     public static void testRemove(int dataset) {
+        List<Double> diffTimes = new ArrayList<>();
+        List<Double> fdTimes = new ArrayList<>();
+
         // load base data
         List<List<String>> csvData = DataIO.readCsvFile(REMOVE_BASE_DATA_INPUT[dataset]);
 
@@ -76,37 +80,52 @@ public class TestCase {
         System.out.println("  # of initial FD: " + fdConnector.getMinFDs().get(0).size());
 
         // load removed data all at once
-        List<List<Integer>> removedData = new ArrayList<>();
-        for(String fp : REMOVE_DELETED_DATA_INPUT[dataset])
-            removedData.add(DataIO.readRemoveFile(fp));
+        List<List<Integer>> removedDatas = new ArrayList<>();
+        for (String fp : REMOVE_DELETED_DATA_INPUT[dataset])
+            removedDatas.add(DataIO.readRemoveFile(fp));
 
 
         // update pli and differenceSet
         System.out.println("Updating PLI and DF: ");
-        long startTime1 = System.nanoTime();
+        long startTime;
         List<List<BitSet>> leftDiffSets = new ArrayList<>();
-        for (int i = 0; i < removedData.size(); i++) {
-            leftDiffSets.add(diffConnector.removeData(removedData.get(i)));
-            System.out.println("  " + i + ". # of left diff sets: " + leftDiffSets.get(i).size());
+        for (List<Integer> removedData : removedDatas) {
+            startTime = System.nanoTime();
+            leftDiffSets.add(diffConnector.removeData(removedData));
+            diffTimes.add((double) (System.nanoTime() - startTime) / 1000000);
         }
-        double runtime1 = (double) (System.nanoTime() - startTime1) / 1000000;
+        leftDiffSets.forEach(ds -> System.out.println("  # of left diff sets: " + ds.size()));
 
         // update FD
         System.out.println("Updating FD: ");
-        long startTime2 = System.nanoTime();
-        for (int i = 0; i < leftDiffSets.size(); i++) {
-            fdConnector.removeSubsets(leftDiffSets.get(i));
-            System.out.println("  " + i + ". # of Fd: " + fdConnector.getMinFDs().get(0).size());
+        List<Integer> fdSizes = new ArrayList<>();
+        for (List<BitSet> leftDiffSet : leftDiffSets) {
+            startTime = System.nanoTime();
+            fdConnector.removeSubsets(leftDiffSet);
+            fdTimes.add((double) (System.nanoTime() - startTime) / 1000000);
+            fdSizes.add(fdConnector.getMinFDs().stream().map(List::size).reduce(0, Integer::sum));
         }
-        double runtime2 = (double) (System.nanoTime() - startTime2) / 1000000;
+        fdSizes.forEach(fd -> System.out.println("  # of FDs: " + fd));
 
         // print runtime
-        System.out.println("[Time]");
-        System.out.println("  Update PLI and Diff: \t" + runtime1 + "ms");
-        System.out.println("  Update FD: \t\t\t" + runtime2 + "ms");
-        System.out.println("  Total: \t\t\t\t" + (runtime1 + runtime2) + "ms");
-        System.out.println("  Average: \t\t\t\t" + (runtime1 + runtime2) / (REMOVE_DELETED_DATA_INPUT[dataset].length) + "ms");
-        System.out.println("--------------------------------------------------------");
+        printTime(diffTimes, fdTimes);
     }
+
+    static void printTime(List<Double> diffTimes, List<Double> fdTimes) {
+        double diffTimeTotal = diffTimes.stream().reduce(0.0, Double::sum);
+        double fdTimeTotal = fdTimes.stream().reduce(0.0, Double::sum);
+
+        System.out.println("[Time]");
+        System.out.println("------------------------------------------------------------");
+        System.out.println("|  No.  |      Diff      |       FD       |      Total     |");
+        System.out.println("------------------------------------------------------------");
+        for (int i = 0; i < diffTimes.size(); i++)
+            System.out.printf("|  %2d   |   %10.2f   |   %10.2f   |   %10.2f   |\n", i, diffTimes.get(i), fdTimes.get(i), diffTimes.get(i) + fdTimes.get(i));
+        System.out.println("------------------------------------------------------------");
+        System.out.printf("|  Avg  |   %10.2f   |   %10.2f   |   %10.2f   |\n", diffTimeTotal / diffTimes.size(), fdTimeTotal / fdTimes.size(), (diffTimeTotal + fdTimeTotal) / fdTimes.size());
+        System.out.printf("| Total |   %10.2f   |   %10.2f   |   %10.2f   |\n", diffTimeTotal, fdTimeTotal, diffTimeTotal + fdTimeTotal);
+        System.out.println("------------------------------------------------------------");
+    }
+
 
 }

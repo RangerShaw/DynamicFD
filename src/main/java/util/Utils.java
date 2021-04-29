@@ -54,12 +54,20 @@ public class Utils {
         return x;
     }
 
+    public static long bitsetToLong(int nAttributes, BitSet bs) {
+        int x = 0;
+        for (int i = 0; i < nAttributes; i++)
+            x = (x << 1) | (bs.get(i) ? 1 : 0);
+        return x;
+    }
+
     public static int bitsetToInverseInt(int nAttributes, BitSet bs) {
         int x = 0;
         for (int i = 0; i < nAttributes; i++)
             x = (x << 1) | (bs.get(i) ? 0 : 1);
         return x;
     }
+
 
 
 }

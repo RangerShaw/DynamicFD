@@ -1,7 +1,6 @@
 package algorithm.differenceSet;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class PliClass {
 
@@ -10,14 +9,13 @@ public class PliClass {
     public int nAttributes;
 
     /**
-     * pliMap[i]["abc"] -> on attribute [i], which cluster "abc" belongs to
+     * pliMap[e]["abc"] -> on attribute e, to which cluster "abc" belongs
      */
     List<Map<String, Integer>> pliMap = new ArrayList<>();
 
     /**
-     * pli[i]: clusters on attribute[i];
-     * pli[i][j]: on attribute[i], what tuples belong to cluster[j];
-     * pli[i][j][k]: tuple index
+     * pli[e]: clusters on attribute e;
+     * pli[e][j]: on attribute e, cluster j contains what tuples
      */
     List<List<List<Integer>>> pli = new ArrayList<>();
 
@@ -51,12 +49,11 @@ public class PliClass {
 
             for (int t = 0; t < data.size(); t++) {
                 Integer clstId = pliMapE.get(data.get(t).get(e));
-                if (clstId == null) {
+                if (clstId == null) {       // new cluster
                     clstId = pliE.size();
                     pliMapE.put(data.get(t).get(e), clstId);
                     pliE.add(new ArrayList<>());
                 }
-
                 pliE.get(clstId).add(t);
                 inversePli.get(t).add(clstId);
             }
@@ -73,17 +70,20 @@ public class PliClass {
         return inversePli;
     }
 
+    public int getTupleCount() {return  nTuples;}
+
     public void insertData(List<List<String>> insertedData) {
+        /* update pliMap and inversePli, pli will be updated in DifferenceSet */
         for (int i = 0; i < insertedData.size(); i++)
             inversePli.add(new ArrayList<>());
 
-        // update pliMap and inversePli, pli will be updated in DifferenceSet
         for (int e = 0; e < nAttributes; e++) {
             for (int t = 0; t < insertedData.size(); t++) {
-                Integer clstId = pliMap.get(e).get(insertedData.get(t).get(e));
-                if (clstId == null) {
+                Map<String, Integer> pliMapE = pliMap.get(e);
+                Integer clstId = pliMapE.get(insertedData.get(t).get(e));
+                if (clstId == null) {       // new cluster
                     clstId = pliMap.get(e).size();
-                    pliMap.get(e).put(insertedData.get(t).get(e), clstId);
+                    pliMapE.put(insertedData.get(t).get(e), clstId);
                 }
                 inversePli.get(t + nTuples).add(clstId);
             }
