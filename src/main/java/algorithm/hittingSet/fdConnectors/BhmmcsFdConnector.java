@@ -14,22 +14,19 @@ public class BhmmcsFdConnector extends FdConnector {
     List<Bhmmcs> bhmmcsList = new ArrayList<>();
 
 
-    /**
-     * @param nElements number of attributes of input dataset
-     */
-    public BhmmcsFdConnector(int nElements) {
-        super(nElements);
-        for (int i = 0; i < nElements; i++)
-            bhmmcsList.add(new Bhmmcs(nElements));
+    public BhmmcsFdConnector() {
     }
 
     /**
      * @param toCover all subsets (different sets) to be covered
      */
-    public void initiate(List<BitSet> toCover) {
+    public void initiate(int nElements, List<BitSet> toCover) {
+        super.initiate(nElements);
+
         for (int rhs = 0; rhs < nElements; rhs++) {
             //System.out.println("  [FdConnector] initiating on rhs " + rhs + "...");
             List<BitSet> diffSets = generateDiffSetsOnRhs(toCover, rhs);
+            bhmmcsList.add(new Bhmmcs(nElements));
             bhmmcsList.get(rhs).initiate(diffSets);
             minFDs.add(bhmmcsList.get(rhs).getMinCoverSets());
         }
@@ -37,7 +34,6 @@ public class BhmmcsFdConnector extends FdConnector {
 
     public void insertSubsets(List<BitSet> addedSets) {
         for (int rhs = 0; rhs < nElements; rhs++) {
-            //System.out.println("  [FdConnector] inserting on rhs " + rhs + "...");
             List<BitSet> newDiffSets = generateDiffSetsOnRhs(addedSets, rhs);
             bhmmcsList.get(rhs).insertSubsets(newDiffSets);
             minFDs.set(rhs, bhmmcsList.get(rhs).getMinCoverSets());
@@ -46,7 +42,6 @@ public class BhmmcsFdConnector extends FdConnector {
 
     public void removeSubsets(List<BitSet> remainedSets) {
         for (int rhs = 0; rhs < nElements; rhs++) {
-            // System.out.println(" [FdConnector] removing on rhs " + rhs + "...");
             List<BitSet> newDiffSets = generateDiffSetsOnRhs(remainedSets, rhs);
             bhmmcsList.get(rhs).removeSubsets(newDiffSets);
             minFDs.set(rhs, bhmmcsList.get(rhs).getMinCoverSets());

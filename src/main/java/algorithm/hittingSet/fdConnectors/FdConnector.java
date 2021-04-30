@@ -17,11 +17,12 @@ public abstract class FdConnector {
     protected List<List<BitSet>> minFDs = new ArrayList<>();
 
 
-    protected FdConnector(int nElements) {
-        this.nElements = nElements;
+    protected FdConnector() {
     }
 
-    public abstract void initiate(List<BitSet> toCover);
+    public void initiate(int nElements) {
+        this.nElements = nElements;
+    }
 
     protected List<BitSet> generateDiffSetsOnRhs(List<BitSet> diffSets, int rhs) {
         List<BitSet> diffSetsOnRhs = new ArrayList<>();
@@ -38,7 +39,7 @@ public abstract class FdConnector {
     }
 
     public List<List<BitSet>> getMinFDs() {
-        return minFDs;
+        return new ArrayList<>(minFDs);
     }
 
 }
