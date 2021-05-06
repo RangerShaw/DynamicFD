@@ -32,20 +32,22 @@ public class BhmmcsFdConnector extends FdConnector {
         }
     }
 
-    public void insertSubsets(List<BitSet> addedSets) {
+    public List<List<BitSet>> insertSubsets(List<BitSet> addedSets) {
         for (int rhs = 0; rhs < nElements; rhs++) {
             List<BitSet> newDiffSets = generateDiffSetsOnRhs(addedSets, rhs);
             bhmmcsList.get(rhs).insertSubsets(newDiffSets);
             minFDs.set(rhs, bhmmcsList.get(rhs).getMinCoverSets());
         }
+        return new ArrayList<>(minFDs);
     }
 
-    public void removeSubsets(List<BitSet> remainedSets) {
+    public List<List<BitSet>> removeSubsets(List<BitSet> remainedSets) {
         for (int rhs = 0; rhs < nElements; rhs++) {
             List<BitSet> newDiffSets = generateDiffSetsOnRhs(remainedSets, rhs);
             bhmmcsList.get(rhs).removeSubsets(newDiffSets);
             minFDs.set(rhs, bhmmcsList.get(rhs).getMinCoverSets());
         }
+        return new ArrayList<>(minFDs);
     }
 
 }

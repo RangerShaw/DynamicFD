@@ -9,19 +9,19 @@ public class DataFp {
     */
 
     // test INSERT
-    static String[] INSERT_BASE_DATA_INPUT = new String[]{
+    static String[] INSERT_INPUT_BASE_DATA = new String[]{
             "dataFiles/letter/insert/letter_15000.csv"
     };
 
-    static String[] INSERT_BASE_DIFF_INPUT = new String[]{
+    static String[] INSERT_INPUT_BASE_DIFF = new String[]{
             "dataFiles/letter/insert/letter_DS_15000.txt"
     };
 
-    static String[] INSERT_BASE_FD_OUTPUT = new String[]{
+    static String[] INSERT_OUTPUT_BASE_FD = new String[]{
             "dataFiles/letter/insert/letter_FD_15000.txt"
     };
 
-    static String[][] INSERT_NEW_DATA_INPUT = new String[][]{
+    static String[][] INSERT_INPUT_NEW_DATA = new String[][]{
             {
                     "dataFiles/letter/insert/letter_15000-16000.csv",
                     "dataFiles/letter/insert/letter_16000-17000.csv",
@@ -34,7 +34,7 @@ public class DataFp {
             }
     };
 
-    static String[][] INSERT_NEW_FD_OUTPUT = new String[][]{
+    static String[][] INSERT_OUTPUT_NEW_FD = new String[][]{
             {
                     "dataFiles/letter/insert/letter_FD_16000.txt",
                     "dataFiles/letter/insert/letter_FD_17000.txt",
@@ -49,18 +49,18 @@ public class DataFp {
 
 
     // test REMOVE
-    static String[] REMOVE_BASE_DATA_INPUT = new String[]{
+    static String[] REMOVE_INPUT_BASE_DATA = new String[]{
             "dataFiles/letter/remove/letter_20000.csv"
     };
 
-    static String[] REMOVE_BASE_DIFF_INPUT = new String[]{
+    static String[] REMOVE_INPUT_BASE_DIFF = new String[]{
             "dataFiles/letter/remove/letter_DS_20000.txt"
     };
-    static String[] REMOVE_BASE_FD_OUTPUT = new String[]{
+    static String[] REMOVE_OUTPUT_BASE_FD = new String[]{
             "dataFiles/letter/remove/letter_FD_20000.txt"
     };
 
-    static String[][] REMOVE_DELETED_DATA_INPUT = new String[][]{
+    static String[][] REMOVE_INPUT_DELETED_DATA = new String[][]{
             {
                     "dataFiles/letter/remove/letter_19000-19999.csv",
                     "dataFiles/letter/remove/letter_18000-18999.csv",
@@ -71,7 +71,7 @@ public class DataFp {
             // the next dataset file path
     };
 
-    static String[][] REMOVE_DELETED_FD_OUTPUT = new String[][]{
+    static String[][] REMOVE_OUTPUT_DELETED_FD = new String[][]{
             {
                     "dataFiles/letter/remove/letter_FD_20000.txt",
                     "dataFiles/letter/remove/letter_FD_19000.txt",

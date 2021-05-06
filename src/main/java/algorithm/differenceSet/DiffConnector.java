@@ -42,7 +42,7 @@ public class DiffConnector {
     }
 
 
-    public List<BitSet> getDiffSets() {
+    public List<BitSet> getDiffSet() {
         return differenceSet.getDiffSet();
     }
 

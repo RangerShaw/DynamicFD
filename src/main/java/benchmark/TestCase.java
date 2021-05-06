@@ -16,11 +16,100 @@ public class TestCase {
         // initiate
         DiffConnector diffConnector = new DiffConnector();
         BhmmcsFdConnector fdConnector = new BhmmcsFdConnector();
-        initiate(diffConnector, fdConnector, INSERT_BASE_DATA_INPUT[dataset], INSERT_BASE_DIFF_INPUT[dataset]);
+        initiate(diffConnector, fdConnector, INSERT_INPUT_BASE_DATA[dataset], INSERT_INPUT_BASE_DIFF[dataset]);
 
         // load inserted data all at once
         List<List<List<String>>> insertDatas = new ArrayList<>();
-        for (String fp : INSERT_NEW_DATA_INPUT[dataset])
+        for (String fp : INSERT_INPUT_NEW_DATA[dataset])
+            insertDatas.add(DataIO.readCsvFile(fp));
+
+        // insert data and record running time
+        System.out.println("[INSERTING]...");
+
+        long startTime;
+        List<Double> diffTimes = new ArrayList<>();
+        List<Double> fdTimes = new ArrayList<>();
+
+        List<List<BitSet>> insertDiffSets = new ArrayList<>();
+        List<List<List<BitSet>>> totalFds = new ArrayList<>();
+
+        for (int i = 0; i < insertDatas.size(); i++) {
+            // update pli and differenceSet
+            startTime = System.nanoTime();
+            List<BitSet> insertDiffSet = diffConnector.insertData(insertDatas.get(i));
+            diffTimes.add((double) (System.nanoTime() - startTime) / 1000000);
+            insertDiffSets.add(insertDiffSet);
+
+            // update FD
+            startTime = System.nanoTime();
+            List<List<BitSet>> currFDs = fdConnector.insertSubsets(insertDiffSet);
+            fdTimes.add((double) (System.nanoTime() - startTime) / 1000000);
+            totalFds.add(currFDs);
+        }
+
+        // print result and time
+        System.out.println("[RESULT]");
+        for (int i = 0; i < insertDatas.size(); i++) {
+            System.out.println("  Round " + i + ":");
+            System.out.println("    # of new Diffs: " + insertDiffSets.get(i).size());
+            System.out.println("    # of total FDs: " + totalFds.get(i).stream().map(List::size).reduce(0, Integer::sum));
+        }
+        printTime(diffTimes, fdTimes);
+    }
+
+    public static void testRemove(int dataset) {
+        // initiate
+        DiffConnector diffConnector = new DiffConnector();
+        BhmmcsFdConnector fdConnector = new BhmmcsFdConnector();
+        initiate(diffConnector, fdConnector, REMOVE_INPUT_BASE_DATA[dataset], REMOVE_INPUT_BASE_DIFF[dataset]);
+
+        // load removed data all at once
+        List<List<Integer>> removedDatas = new ArrayList<>();
+        for (String fp : REMOVE_INPUT_DELETED_DATA[dataset])
+            removedDatas.add(DataIO.readRemoveFile(fp));
+
+        // remove data and record running time
+        System.out.println("[REMOVING]...");
+
+        long startTime;
+        List<Double> diffTimes = new ArrayList<>();
+        List<Double> fdTimes = new ArrayList<>();
+
+        List<List<BitSet>> leftDiffSets = new ArrayList<>();
+        List<List<List<BitSet>>> totalFds = new ArrayList<>();
+        for (int i = 0; i < removedDatas.size(); i++) {
+            // update pli and differenceSet
+            startTime = System.nanoTime();
+            List<BitSet> leftDiffSet = diffConnector.removeData(removedDatas.get(i));
+            diffTimes.add((double) (System.nanoTime() - startTime) / 1000000);
+            leftDiffSets.add(leftDiffSet);
+
+            // update FD
+            startTime = System.nanoTime();
+            List<List<BitSet>> currFDs = fdConnector.removeSubsets(leftDiffSet);
+            fdTimes.add((double) (System.nanoTime() - startTime) / 1000000);
+            totalFds.add(currFDs);
+        }
+
+        // print result and time
+        System.out.println("[RESULT]");
+        for (int i = 0; i < leftDiffSets.size(); i++) {
+            System.out.println("  Round " + i + ":");
+            System.out.println("    # of remaining Diffs: " + leftDiffSets.get(i).size());
+            System.out.println("    # of total FDs: " + totalFds.get(i).stream().map(List::size).reduce(0, Integer::sum));
+        }
+        printTime(diffTimes, fdTimes);
+    }
+
+    public static void testInsert1(int dataset) {
+        // initiate
+        DiffConnector diffConnector = new DiffConnector();
+        BhmmcsFdConnector fdConnector = new BhmmcsFdConnector();
+        initiate(diffConnector, fdConnector, INSERT_INPUT_BASE_DATA[dataset], INSERT_INPUT_BASE_DIFF[dataset]);
+
+        // load inserted data all at once
+        List<List<List<String>>> insertDatas = new ArrayList<>();
+        for (String fp : INSERT_INPUT_NEW_DATA[dataset])
             insertDatas.add(DataIO.readCsvFile(fp));
 
         // record running time
@@ -53,15 +142,15 @@ public class TestCase {
         printTime(diffTimes, fdTimes);
     }
 
-    public static void testRemove(int dataset) {
+    public static void testRemove1(int dataset) {
         // initiate
         DiffConnector diffConnector = new DiffConnector();
         BhmmcsFdConnector fdConnector = new BhmmcsFdConnector();
-        initiate(diffConnector, fdConnector, REMOVE_BASE_DATA_INPUT[dataset], REMOVE_BASE_DIFF_INPUT[dataset]);
+        initiate(diffConnector, fdConnector, REMOVE_INPUT_BASE_DATA[dataset], REMOVE_INPUT_BASE_DIFF[dataset]);
 
         // load removed data all at once
         List<List<Integer>> removedDatas = new ArrayList<>();
-        for (String fp : REMOVE_DELETED_DATA_INPUT[dataset])
+        for (String fp : REMOVE_INPUT_DELETED_DATA[dataset])
             removedDatas.add(DataIO.readRemoveFile(fp));
 
         // record running time
@@ -96,7 +185,7 @@ public class TestCase {
 
     static void initiate(DiffConnector diffConnector, BhmmcsFdConnector fdConnector, String BASE_DATA_INPUT, String BASE_DIFF_INPUT) {
         // load base data
-        System.out.println("Initializing...");
+        System.out.println("[INITIALIZING]...");
         List<List<String>> csvData = DataIO.readCsvFile(BASE_DATA_INPUT);
 
         // initiate pli and differenceSet
