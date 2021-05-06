@@ -13,17 +13,17 @@ import static benchmark.DataFp.*;
 public class TestCase {
 
     public static void testInsert(int dataset) {
-        // initiate
+        // 1 initiate
         DiffConnector diffConnector = new DiffConnector();
         BhmmcsFdConnector fdConnector = new BhmmcsFdConnector();
         initiate(diffConnector, fdConnector, INSERT_INPUT_BASE_DATA[dataset], INSERT_INPUT_BASE_DIFF[dataset]);
 
-        // load inserted data all at once
+        // 2 load inserted data all at once
         List<List<List<String>>> insertDatas = new ArrayList<>();
         for (String fp : INSERT_INPUT_NEW_DATA[dataset])
             insertDatas.add(DataIO.readCsvFile(fp));
 
-        // insert data and record running time
+        // 3 insert data and record running time
         System.out.println("[INSERTING]...");
 
         long startTime;
@@ -34,36 +34,35 @@ public class TestCase {
         List<List<List<BitSet>>> totalFds = new ArrayList<>();
 
         for (int i = 0; i < insertDatas.size(); i++) {
-            // update pli and differenceSet
+            // 3.1 update pli and differenceSet
             startTime = System.nanoTime();
             List<BitSet> insertDiffSet = diffConnector.insertData(insertDatas.get(i));
             diffTimes.add((double) (System.nanoTime() - startTime) / 1000000);
             insertDiffSets.add(insertDiffSet);
 
-            // update FD
+            // 3.2 update FD
             startTime = System.nanoTime();
             List<List<BitSet>> currFDs = fdConnector.insertSubsets(insertDiffSet);
             fdTimes.add((double) (System.nanoTime() - startTime) / 1000000);
             totalFds.add(currFDs);
         }
 
-        // print result and time
-        System.out.println("[RESULT]");
+        // 4 print result and time
         printResult(true, insertDiffSets, totalFds, diffTimes, fdTimes);
     }
 
     public static void testRemove(int dataset) {
-        // initiate
+        // 1 initiate
         DiffConnector diffConnector = new DiffConnector();
         BhmmcsFdConnector fdConnector = new BhmmcsFdConnector();
         initiate(diffConnector, fdConnector, REMOVE_INPUT_BASE_DATA[dataset], REMOVE_INPUT_BASE_DIFF[dataset]);
 
-        // load removed data all at once
+        // 2 load removed data all at once
         List<List<Integer>> removedDatas = new ArrayList<>();
         for (String fp : REMOVE_INPUT_DELETED_DATA[dataset])
             removedDatas.add(DataIO.readRemoveFile(fp));
 
-        // remove data and record running time
+        // 3 remove data and record running time
         System.out.println("[REMOVING]...");
 
         long startTime;
@@ -73,21 +72,20 @@ public class TestCase {
         List<List<BitSet>> leftDiffSets = new ArrayList<>();
         List<List<List<BitSet>>> totalFds = new ArrayList<>();
         for (int i = 0; i < removedDatas.size(); i++) {
-            // update pli and differenceSet
+            // 3.1 update pli and differenceSet
             startTime = System.nanoTime();
             List<BitSet> leftDiffSet = diffConnector.removeData(removedDatas.get(i));
             diffTimes.add((double) (System.nanoTime() - startTime) / 1000000);
             leftDiffSets.add(leftDiffSet);
 
-            // update FD
+            // 3.2 update FD
             startTime = System.nanoTime();
             List<List<BitSet>> currFDs = fdConnector.removeSubsets(leftDiffSet);
             fdTimes.add((double) (System.nanoTime() - startTime) / 1000000);
             totalFds.add(currFDs);
         }
 
-        // print result and time
-        System.out.println("[RESULT]");
+        // 4 print result and time
         printResult(false, leftDiffSets, totalFds, diffTimes, fdTimes);
     }
 
@@ -192,6 +190,7 @@ public class TestCase {
         double diffTimeTotal = diffTimes.stream().reduce(0.0, Double::sum);
         double fdTimeTotal = fdTimes.stream().reduce(0.0, Double::sum);
 
+        System.out.println("[RESULT]");
         System.out.println("----------------------------------------------------------------------------------------------");
         System.out.println("|       |              Size               |                     Time/ms                      |");
         System.out.println("|  No.  |---------------------------------+--------------------------------------------------|");

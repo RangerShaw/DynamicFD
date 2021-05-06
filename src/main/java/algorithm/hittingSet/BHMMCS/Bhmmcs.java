@@ -108,10 +108,16 @@ public class Bhmmcs {
         initiate(remainedSets);
     }
 
-    public List<BitSet> getMinCoverSets() {
+    public List<BitSet> getSortedMinCoverSets() {
         return hasEmptySubset ? new ArrayList<>() : coverNodes.stream()
                 .map(BhmmcsNode::getElements)
                 .sorted(Utils.BitsetComparator())
+                .collect(Collectors.toList());
+    }
+
+    public List<BitSet> getMinCoverSets() {
+        return hasEmptySubset ? new ArrayList<>() : coverNodes.stream()
+                .map(BhmmcsNode::getElements)
                 .collect(Collectors.toList());
     }
 
