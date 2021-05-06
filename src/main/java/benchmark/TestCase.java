@@ -49,12 +49,7 @@ public class TestCase {
 
         // print result and time
         System.out.println("[RESULT]");
-        for (int i = 0; i < insertDatas.size(); i++) {
-            System.out.println("  Round " + i + ":");
-            System.out.println("    # of new Diffs: " + insertDiffSets.get(i).size());
-            System.out.println("    # of total FDs: " + totalFds.get(i).stream().map(List::size).reduce(0, Integer::sum));
-        }
-        printTime(diffTimes, fdTimes);
+        printResult(true, insertDiffSets, totalFds, diffTimes, fdTimes);
     }
 
     public static void testRemove(int dataset) {
@@ -93,12 +88,7 @@ public class TestCase {
 
         // print result and time
         System.out.println("[RESULT]");
-        for (int i = 0; i < leftDiffSets.size(); i++) {
-            System.out.println("  Round " + i + ":");
-            System.out.println("    # of remaining Diffs: " + leftDiffSets.get(i).size());
-            System.out.println("    # of total FDs: " + totalFds.get(i).stream().map(List::size).reduce(0, Integer::sum));
-        }
-        printTime(diffTimes, fdTimes);
+        printResult(false, leftDiffSets, totalFds, diffTimes, fdTimes);
     }
 
     public static void testInsert1(int dataset) {
@@ -139,7 +129,7 @@ public class TestCase {
         fdSizes.forEach(fd -> System.out.println("  # of FDs: " + fd));
 
         // print runtime
-        printTime(diffTimes, fdTimes);
+        //printTime(diffTimes, fdTimes);
     }
 
     public static void testRemove1(int dataset) {
@@ -180,7 +170,7 @@ public class TestCase {
         fdSizes.forEach(fd -> System.out.println("  # of FDs: " + fd));
 
         // print runtime
-        printTime(diffTimes, fdTimes);
+        //printTime(diffTimes, fdTimes);
     }
 
     static void initiate(DiffConnector diffConnector, BhmmcsFdConnector fdConnector, String BASE_DATA_INPUT, String BASE_DIFF_INPUT) {
@@ -198,20 +188,22 @@ public class TestCase {
 
     }
 
-    static void printTime(List<Double> diffTimes, List<Double> fdTimes) {
+    static void printResult(boolean isInsert, List<List<BitSet>> diffSets, List<List<List<BitSet>>> fds, List<Double> diffTimes, List<Double> fdTimes) {
         double diffTimeTotal = diffTimes.stream().reduce(0.0, Double::sum);
         double fdTimeTotal = fdTimes.stream().reduce(0.0, Double::sum);
 
-        System.out.println("                                                  [Time]: ms");
-        System.out.println("------------------------------------------------------------");
-        System.out.println("|  No.  |      Diff      |       FD       |      Total     |");
-        System.out.println("|-------+----------------+----------------+----------------|");
-        for (int i = 0; i < diffTimes.size(); i++)
-            System.out.printf("|  %2d   |   %10.2f   |   %10.2f   |   %10.2f   |\n", i, diffTimes.get(i), fdTimes.get(i), diffTimes.get(i) + fdTimes.get(i));
-        System.out.println("|-------+----------------+----------------+----------------|");
-        System.out.printf("|  Avg  |   %10.2f   |   %10.2f   |   %10.2f   |\n", diffTimeTotal / diffTimes.size(), fdTimeTotal / fdTimes.size(), (diffTimeTotal + fdTimeTotal) / fdTimes.size());
-        System.out.printf("| Total |   %10.2f   |   %10.2f   |   %10.2f   |\n", diffTimeTotal, fdTimeTotal, diffTimeTotal + fdTimeTotal);
-        System.out.println("------------------------------------------------------------\n");
+        System.out.println("----------------------------------------------------------------------------------------------");
+        System.out.println("|       |              Size               |                     Time/ms                      |");
+        System.out.println("|  No.  |---------------------------------+--------------------------------------------------|");
+        System.out.printf ("|       | %s |       FD       |      Diff      |       FD       |      Total     |\n", isInsert ? "   New Diff   " : "Remaining Diff");
+        System.out.println("|-------+----------------+----------------+----------------+----------------+----------------|");
+        for (int i = 0; i < diffTimes.size(); i++) {
+            System.out.printf("|  %2d   |   %10d   |   %10d   |   %10.2f   |   %10.2f   |   %10.2f   |\n", i, diffSets.get(i).size(), fds.get(i).stream().map(List::size).reduce(0, Integer::sum), diffTimes.get(i), fdTimes.get(i), diffTimes.get(i) + fdTimes.get(i));
+        }
+        System.out.println("|-------+----------------+----------------+----------------+----------------+----------------|");
+        System.out.printf ("|  Avg  |      %3c       |       %3c      |   %10.2f   |   %10.2f   |   %10.2f   |\n", ' ', ' ', diffTimeTotal / diffTimes.size(), fdTimeTotal / fdTimes.size(), (diffTimeTotal + fdTimeTotal) / fdTimes.size());
+        System.out.printf ("| Total |      %3c       |       %3c      |   %10.2f   |   %10.2f   |   %10.2f   |\n", ' ', ' ', diffTimeTotal, fdTimeTotal, diffTimeTotal + fdTimeTotal);
+        System.out.println("----------------------------------------------------------------------------------------------\n");
     }
 
 
