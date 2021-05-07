@@ -70,7 +70,9 @@ public class PliClass {
         return inversePli;
     }
 
-    public int getTupleCount() {return  nTuples;}
+    public int getTupleCount() {
+        return nTuples;
+    }
 
     public void insertData(List<List<String>> insertedData) {
         /* update pliMap and inversePli, pli will be updated in DifferenceSet */
@@ -93,20 +95,19 @@ public class PliClass {
     }
 
     public void removeData(List<Integer> removedTuples, boolean[] removed) {
+        // update inversePli, generate newId for remaining tuples
         int[] newId = new int[inversePli.size()];
 
-        // update inversePli, generate newId for remaining tuples
-        removedTuples.add(removedTuples.size(), inversePli.size());
+        removedTuples.add(removedTuples.size(), inversePli.size());     // add pseudo tail
         for (int i = 0; i < removedTuples.size() - 1; i++) {
             int l = removedTuples.get(i), r = removedTuples.get(i + 1);
             newId[l] = -1;
             for (int j = l + 1; j < r; j++) {
-                int currId = j - i - 1;
-                newId[j] = currId;
-                inversePli.set(currId, inversePli.get(j));
+                newId[j] = j - i - 1;
+                inversePli.set(newId[j], inversePli.get(j));
             }
         }
-        removedTuples.remove(removedTuples.size() - 1);
+        removedTuples.remove(removedTuples.size() - 1);         // remove pseudo tail
 
         inversePli.subList(inversePli.size() - removedTuples.size(), inversePli.size()).clear();
 
@@ -114,9 +115,10 @@ public class PliClass {
         for (List<List<Integer>> pliE : pli) {
             for (List<Integer> clst : pliE) {
                 clst.removeIf(i -> removed[i]);
-                for (int i = 0; i < clst.size(); i++)
-                    if (clst.get(i) > removedTuples.get(0))
-                        clst.set(i, newId[clst.get(i)]);
+                for (int i = 0; i < clst.size(); i++) {
+                    int firstRemovedIndex = removedTuples.get(0);
+                    if (clst.get(i) > firstRemovedIndex) clst.set(i, newId[clst.get(i)]);
+                }
             }
         }
 

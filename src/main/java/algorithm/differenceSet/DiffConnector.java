@@ -16,6 +16,7 @@ public class DiffConnector {
         int nAttributes = data.isEmpty() ? 0 : data.get(0).size();
         pliClass = new PliClass();
         differenceSet = nAttributes <= 32 ? new DifferenceSet() : new DifferenceSet64();
+        //differenceSet = new MinDifferenceSet();
     }
 
     public List<BitSet> generatePliAndDiff(List<List<String>> data) {

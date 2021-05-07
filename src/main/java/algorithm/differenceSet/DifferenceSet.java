@@ -91,7 +91,7 @@ public class DifferenceSet implements DifferenceSetInterface{
                 if (clstId >= pliE.size())                      // new cluster
                     pliE.add(new ArrayList<>());
                 else {
-                    int mask = ~(1 << (nAttributes - 1 - e));   // existing cluster
+                    int mask = ~(1 << e);   // existing cluster
                     for (int neighbor : pliE.get(clstId)) {
                         diffBools[neighbor][e] = false;
                         diffHash[neighbor] &= mask;
@@ -135,7 +135,7 @@ public class DifferenceSet implements DifferenceSetInterface{
 
             // generate diffBools and diffHash
             for (int e = 0; e < nAttributes; e++) {
-                int mask = ~(1 << (nAttributes - 1 - e));   // existing cluster
+                int mask = ~(1 << e);   // existing cluster
                 for (int neighbor : pli.get(e).get(inversePli.get(t).get(e))) {
                     diffBools[neighbor][e] = false;
                     diffHash[neighbor] &= mask;
