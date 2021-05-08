@@ -28,6 +28,20 @@ public class Utils {
         return x;
     }
 
+    public static BitSet intToBitSet(int nAttributes, int n) {
+        BitSet bs = new BitSet(nAttributes);
+        for (int i = 0; i < nAttributes; i++)
+            if ((n & (1 << i)) != 0) bs.set(i);
+        return bs;
+    }
+
+    public static BitSet longToBitSet(int nAttributes, long n) {
+        BitSet bs = new BitSet(nAttributes);
+        for (int i = 0; i < nAttributes; i++)
+            if ((n & (1L << i)) != 0) bs.set(i);
+        return bs;
+    }
+
     public static BitSet boolArrayToBitSet(boolean[] bools) {
         BitSet bs = new BitSet(bools.length);
         for (int i = 0; i < bools.length; i++)

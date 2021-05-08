@@ -1,5 +1,8 @@
 package benchmark;
 
+/**
+ * Data File Path
+ */
 public class DataFp {
 
     /*
@@ -8,7 +11,9 @@ public class DataFp {
         3   ...
     */
 
-    // test INSERT
+
+    /* test INSERT */
+
     static String[] INSERT_INPUT_BASE_DATA = new String[]{
             "dataFiles/letter/insert/letter_15000.csv"
     };
@@ -48,7 +53,9 @@ public class DataFp {
     };
 
 
-    // test REMOVE
+
+    /* test REMOVE */
+
     static String[] REMOVE_INPUT_BASE_DATA = new String[]{
             "dataFiles/letter/remove/letter_20000.csv"
     };
