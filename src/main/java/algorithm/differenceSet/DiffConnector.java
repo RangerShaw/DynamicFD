@@ -59,14 +59,14 @@ public class DiffConnector {
     /**
      * @return remain Diffs
      */
-    public List<BitSet> removeData(List<Integer> removedData) {
+    public List<BitSet> removeData(List<Integer> removedData, Set<BitSet> removedDiffs) {
         removedData.sort(Integer::compareTo);
 
         boolean[] removed = new boolean[pliClass.getTupleCount()];
         for (int i : removedData)
             removed[i] = true;
 
-        List<BitSet> leftDiffs = differenceSet.removeData(pliClass.getPli(), pliClass.getInversePli(), removedData, removed);
+        List<BitSet> leftDiffs = differenceSet.removeData(pliClass.getPli(), pliClass.getInversePli(), removedData, removed, removedDiffs);
 
         pliClass.removeData(removedData, removed);
 

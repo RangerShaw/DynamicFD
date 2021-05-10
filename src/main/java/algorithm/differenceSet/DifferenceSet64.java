@@ -113,14 +113,14 @@ public class DifferenceSet64 implements DifferenceSetInterface {
     /**
      * @return remaining Diffs
      */
-    public List<BitSet> removeData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli, List<Integer> removedData, boolean[] removed) {
+    public List<BitSet> removeData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli, List<Integer> removedData, boolean[] removed ,Set<BitSet> removedDiffs) {
         long[] diffHash = new long[inversePli.size()];
 
         long initHash = 0;
         for (int i = 0; i < nAttributes; i++)
             initHash |= (1L << i);
 
-        Set<BitSet> removedDiffs = new HashSet<>();
+       // Set<BitSet> removedDiffs = new HashSet<>();
 
         for (int t : removedData) {
             // reset structures
@@ -150,6 +150,5 @@ public class DifferenceSet64 implements DifferenceSetInterface {
     public List<BitSet> getDiffSet() {
         return new ArrayList<>(diffSet);
     }
-
 
 }

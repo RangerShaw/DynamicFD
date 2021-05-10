@@ -60,16 +60,32 @@ public class DataIO {
         return differnceSetAll;
     }
 
-    public static void printFDs(FdConnector fdConnector, String writeFilePath) {
+    public static void printFDs(FdConnector fdConnector, String writeFilePath, boolean append) {
         List<List<BitSet>> fd = fdConnector.getMinFDs();
         for (int i = 0; i < fd.size(); i++) {
-            try (PrintWriter pw = new PrintWriter(new FileWriter(writeFilePath, true))) {
-                pw.println("FDs for attr " + i);
+            try (PrintWriter pw = new PrintWriter(new FileWriter(writeFilePath, append))) {
+                pw.println("FDs for attribute " + i + ":");
                 fd.get(i).forEach(pw::println);
                 pw.println();
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public static void printFDs(FdConnector fdConnector, String writeFilePath) {
+        List<List<BitSet>> fds = fdConnector.getMinFDs();
+        for (List<BitSet> fd : fds)
+            fd.sort(Utils.BitsetComparator());
+
+        try (PrintWriter pw = new PrintWriter(new FileWriter(writeFilePath, false))) {
+            for (int i = 0; i < fds.size(); i++) {
+                pw.println("FDs for attribute " + i + ":");
+                fds.get(i).forEach(pw::println);
+                pw.println();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

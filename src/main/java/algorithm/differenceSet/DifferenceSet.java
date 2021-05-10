@@ -76,22 +76,22 @@ public class DifferenceSet implements DifferenceSetInterface {
 
         List<BitSet> newDiffs = new ArrayList<>();
 
-        // for each newly inserted tuple
+        // for each newly inserted tuple, generate its diffs with all front tuples
         for (int t = nTuples; t < inversePli.size(); t++) {
-            // reset structures
+            // reset diffHash
             Arrays.fill(diffHash, initHash);
 
-            // update pli, generate diffBools and diffHash
+            // update pli, generate diffHash
             for (int e = 0; e < nAttributes; e++) {
                 List<List<Integer>> pliE = pli.get(e);
                 int clstId = inversePli.get(t).get(e);
 
                 if (clstId >= pliE.size())                      // new cluster
                     pliE.add(new ArrayList<>());
-                else {
-                    int mask = ~(1 << e);                       // existing cluster
+                else {                                          // existing cluster
+                    int mask = ~(1 << e);
                     for (int neighbor : pliE.get(clstId))
-                        diffHash[neighbor] &= mask;
+                        diffHash[neighbor] &=  mask;
                 }
 
                 pliE.get(clstId).add(t);
@@ -113,22 +113,22 @@ public class DifferenceSet implements DifferenceSetInterface {
     /**
      * @return remaining Diffs
      */
-    public List<BitSet> removeData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli, List<Integer> removedData, boolean[] removed) {
+    public List<BitSet> removeData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli, List<Integer> removedData, boolean[] removed, Set<BitSet> removedDiffs) {
         int[] diffHash = new int[inversePli.size()];
 
         int initHash = 0;
         for (int i = 0; i < nAttributes; i++)
             initHash |= (1 << i);
 
-        Set<BitSet> removedDiffs = new HashSet<>();
+        //Set<BitSet> removedDiffs = new HashSet<>();
 
         for (int t : removedData) {
-            // reset structures
+            // reset diffHash
             Arrays.fill(diffHash, initHash);
 
-            // generate diffBools and diffHash
+            // generate diffHash
             for (int e = 0; e < nAttributes; e++) {
-                int mask = ~(1 << e);   // existing cluster
+                int mask = ~(1 << e);
                 for (int neighbor : pli.get(e).get(inversePli.get(t).get(e)))
                     diffHash[neighbor] &= mask;
             }

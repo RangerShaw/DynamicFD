@@ -1,8 +1,6 @@
 package algorithm.hittingSet.fdConnectors;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.List;
+import java.util.*;
 
 public abstract class FdConnector {
 
@@ -24,8 +22,22 @@ public abstract class FdConnector {
         this.nElements = nElements;
     }
 
-    protected List<BitSet> generateDiffSetsOnRhs(List<BitSet> diffSets, int rhs) {
+    protected List<BitSet> generateDiffsOnRhs(List<BitSet> diffSets, int rhs) {
         List<BitSet> diffSetsOnRhs = new ArrayList<>();
+
+        for (BitSet diffSet : diffSets) {
+            if (diffSet.get(rhs)) {
+                BitSet diffSetRhs = (BitSet) diffSet.clone();
+                diffSetRhs.clear(rhs);
+                diffSetsOnRhs.add(diffSetRhs);
+            }
+        }
+
+        return diffSetsOnRhs;
+    }
+
+    protected Set<BitSet> generateDiffsOnRhs(Set<BitSet> diffSets, int rhs) {
+        Set<BitSet> diffSetsOnRhs = new HashSet<>();
 
         for (BitSet diffSet : diffSets) {
             if (diffSet.get(rhs)) {

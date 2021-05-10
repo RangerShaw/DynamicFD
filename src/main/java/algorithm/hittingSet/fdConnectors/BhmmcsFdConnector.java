@@ -1,10 +1,12 @@
 package algorithm.hittingSet.fdConnectors;
 
+import algorithm.hittingSet.BHMMCS.Bhmmcs1;
 import algorithm.hittingSet.BHMMCS.Bhmmcs;
 
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
+import java.util.Set;
 
 public class BhmmcsFdConnector extends FdConnector {
 
@@ -25,7 +27,7 @@ public class BhmmcsFdConnector extends FdConnector {
 
         for (int rhs = 0; rhs < nElements; rhs++) {
             //System.out.println("  [FdConnector] initiating on rhs " + rhs + "...");
-            List<BitSet> diffSets = generateDiffSetsOnRhs(toCover, rhs);
+            List<BitSet> diffSets = generateDiffsOnRhs(toCover, rhs);
             bhmmcsList.add(new Bhmmcs(nElements));
             bhmmcsList.get(rhs).initiate(diffSets);
             minFDs.add(bhmmcsList.get(rhs).getMinCoverSets());
@@ -34,7 +36,7 @@ public class BhmmcsFdConnector extends FdConnector {
 
     public List<List<BitSet>> insertSubsets(List<BitSet> addedSets) {
         for (int rhs = 0; rhs < nElements; rhs++) {
-            List<BitSet> newDiffSets = generateDiffSetsOnRhs(addedSets, rhs);
+            List<BitSet> newDiffSets = generateDiffsOnRhs(addedSets, rhs);
             bhmmcsList.get(rhs).insertSubsets(newDiffSets);
             minFDs.set(rhs, bhmmcsList.get(rhs).getMinCoverSets());
         }
@@ -43,8 +45,19 @@ public class BhmmcsFdConnector extends FdConnector {
 
     public List<List<BitSet>> removeSubsets(List<BitSet> remainedSets) {
         for (int rhs = 0; rhs < nElements; rhs++) {
-            List<BitSet> newDiffSets = generateDiffSetsOnRhs(remainedSets, rhs);
+            List<BitSet> newDiffSets = generateDiffsOnRhs(remainedSets, rhs);
             bhmmcsList.get(rhs).removeSubsets(newDiffSets);
+            minFDs.set(rhs, bhmmcsList.get(rhs).getMinCoverSets());
+        }
+        return new ArrayList<>(minFDs);
+    }
+
+    public List<List<BitSet>> removeSubsets(List<BitSet> leftDiffSets, List<BitSet> removedDiffSets) {
+        for (int rhs = 0; rhs < nElements; rhs++) {
+            List<BitSet> leftDiffSet = generateDiffsOnRhs(leftDiffSets, rhs);
+            List<BitSet> removedDiffSet = generateDiffsOnRhs(removedDiffSets, rhs);
+            //bhmmcsList.get(rhs).removeSubsets(leftDiffSet, removedDiffSet);
+            bhmmcsList.get(rhs).removeSubsets(leftDiffSet);
             minFDs.set(rhs, bhmmcsList.get(rhs).getMinCoverSets());
         }
         return new ArrayList<>(minFDs);

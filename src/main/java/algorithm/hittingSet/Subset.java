@@ -38,6 +38,10 @@ public class Subset {
         return elements.stream();
     }
 
+    public boolean isCoveredBy(BitSet bs) {
+        return bs.stream().anyMatch(e -> elements.get(e));
+    }
+
     void clear(int e) {
         elements.clear(e);
     }
@@ -51,6 +55,5 @@ public class Subset {
     public boolean equals(Object obj) {
         return obj instanceof Subset && ((Subset) obj).elements.equals(elements);
     }
-
 
 }

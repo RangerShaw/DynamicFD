@@ -72,4 +72,10 @@ public class Utils {
         return res;
     }
 
+    public static boolean isSubset(BitSet a, BitSet b) {
+        BitSet and = (BitSet) a.clone();
+        and.and(b);
+        return and.equals(a);
+    }
+
 }

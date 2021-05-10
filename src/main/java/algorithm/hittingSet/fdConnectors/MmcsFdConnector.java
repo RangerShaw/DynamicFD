@@ -24,7 +24,7 @@ public class MmcsFdConnector extends FdConnector {
         super.initiate(nElements);
         for (int rhs = 0; rhs < nElements; rhs++) {
             System.out.println("  [FdConnector] initiating on rhs " + rhs + "...");
-            List<BitSet> diffSets = generateDiffSetsOnRhs(toCover, rhs);
+            List<BitSet> diffSets = generateDiffsOnRhs(toCover, rhs);
             MmcsList.add(new Mmcs(nElements));
             MmcsList.get(rhs).initiate(diffSets);
             minFDs.add(MmcsList.get(rhs).getMinCoverSets());

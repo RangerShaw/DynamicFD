@@ -80,11 +80,11 @@ public class DataFp {
 
     static String[][] REMOVE_OUTPUT_DELETED_FD = new String[][]{
             {
-                    "dataFiles/letter/remove/letter_FD_20000.txt",
                     "dataFiles/letter/remove/letter_FD_19000.txt",
                     "dataFiles/letter/remove/letter_FD_18000.txt",
                     "dataFiles/letter/remove/letter_FD_17000.txt",
-                    "dataFiles/letter/remove/letter_FD_16000.txt"
+                    "dataFiles/letter/remove/letter_FD_16000.txt",
+                    "dataFiles/letter/remove/letter_FD_15000.txt",
             }
     };
 
