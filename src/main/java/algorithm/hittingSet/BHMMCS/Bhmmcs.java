@@ -28,6 +28,7 @@ public class Bhmmcs {
      */
     private boolean hasEmptySubset = false;
 
+    // TODO: change Integer to BitSet
     /**
      * record nodes walked to avoid duplication
      */

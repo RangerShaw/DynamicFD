@@ -1,12 +1,11 @@
 package algorithm.hittingSet.fdConnectors;
 
-import algorithm.hittingSet.BHMMCS.Bhmmcs1;
+//import algorithm.hittingSet.BHMMCS.Bhmmcs1;
 import algorithm.hittingSet.BHMMCS.Bhmmcs;
 
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
-import java.util.Set;
 
 public class BhmmcsFdConnector extends FdConnector {
 
@@ -15,6 +14,7 @@ public class BhmmcsFdConnector extends FdConnector {
      */
     List<Bhmmcs> bhmmcsList = new ArrayList<>();
 
+    List<List<Integer>> subsetParts = new ArrayList<>();
 
     public BhmmcsFdConnector() {
     }
@@ -26,7 +26,6 @@ public class BhmmcsFdConnector extends FdConnector {
         super.initiate(nElements);
 
         for (int rhs = 0; rhs < nElements; rhs++) {
-            //System.out.println("  [FdConnector] initiating on rhs " + rhs + "...");
             List<BitSet> diffSets = generateDiffsOnRhs(toCover, rhs);
             bhmmcsList.add(new Bhmmcs(nElements));
             bhmmcsList.get(rhs).initiate(diffSets);
