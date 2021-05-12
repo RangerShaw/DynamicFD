@@ -6,6 +6,7 @@ import util.DataIO;
 import util.Utils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DifferenceSet implements DifferenceSetInterface {
 
@@ -13,7 +14,7 @@ public class DifferenceSet implements DifferenceSetInterface {
 
     int nTuples;
 
-    List<BitSet> diffSet = new ArrayList<>();
+    List<Integer> diffSet = new ArrayList<>();
 
     /**
      * hashcode of a Diff -> count of its occurrences
@@ -29,7 +30,7 @@ public class DifferenceSet implements DifferenceSetInterface {
         nAttributes = inversePli.isEmpty() ? 0 : inversePli.get(0).size();
     }
 
-    public List<BitSet> generateDiffSet(List<List<Integer>> inversePli) {
+    public List<Integer> generateDiffSet(List<List<Integer>> inversePli) {
         initiateDataStructure(inversePli);
 
         Map<BitSet, Integer> diffSetMap = new HashMap<>();
@@ -43,7 +44,7 @@ public class DifferenceSet implements DifferenceSetInterface {
             }
         }
 
-        diffSet.addAll(diffSetMap.keySet());
+        diffSet.addAll(diffSetMap.keySet().stream().map(bs -> Utils.bitsetToInt(nAttributes, bs)).collect(Collectors.toList()));
 
         for (Map.Entry<BitSet, Integer> df : diffSetMap.entrySet())
             diffFreq.addValue(Utils.bitsetToInt(nAttributes, df.getKey()), df.getValue());
@@ -51,12 +52,12 @@ public class DifferenceSet implements DifferenceSetInterface {
         return new ArrayList<>(diffSet);
     }
 
-    public List<BitSet> generateDiffSet(List<List<Integer>> inversePli, String diffFp) {
+    public List<Integer> generateDiffSet(List<List<Integer>> inversePli, String diffFp) {
         initiateDataStructure(inversePli);
 
         Map<BitSet, Integer> diffSetMap = DataIO.readDiffSetsMap(diffFp);
 
-        diffSet.addAll(diffSetMap.keySet());
+        diffSet.addAll(diffSetMap.keySet().stream().map(bs -> Utils.bitsetToInt(nAttributes, bs)).collect(Collectors.toList()));
 
         for (Map.Entry<BitSet, Integer> df : diffSetMap.entrySet())
             diffFreq.addValue(Utils.bitsetToInt(nAttributes, df.getKey()), df.getValue());
@@ -67,14 +68,14 @@ public class DifferenceSet implements DifferenceSetInterface {
     /**
      * @return new Diffs
      */
-    public List<BitSet> insertData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli) {
+    public List<Integer> insertData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli) {
         int[] diffHash = new int[inversePli.size()];
 
         int initHash = 0;
         for (int i = 0; i < nAttributes; i++)
             initHash |= (1 << i);
 
-        List<BitSet> newDiffs = new ArrayList<>();
+        List<Integer> newDiffs = new ArrayList<>();
 
         // for each newly inserted tuple, generate its diffs with all front tuples
         for (int t = nTuples; t < inversePli.size(); t++) {
@@ -91,7 +92,7 @@ public class DifferenceSet implements DifferenceSetInterface {
                 else {                                          // existing cluster
                     int mask = ~(1 << e);
                     for (int neighbor : pliE.get(clstId))
-                        diffHash[neighbor] &=  mask;
+                        diffHash[neighbor] &= mask;
                 }
 
                 pliE.get(clstId).add(t);
@@ -100,7 +101,7 @@ public class DifferenceSet implements DifferenceSetInterface {
             // generate new diff
             for (int i = 0; i < t; i++) {
                 if (diffFreq.addValue(diffHash[i], 1, 0) == 1)
-                    newDiffs.add(Utils.intToBitSet(nAttributes, diffHash[i]));
+                    newDiffs.add(diffHash[i]);
             }
         }
 
@@ -113,7 +114,7 @@ public class DifferenceSet implements DifferenceSetInterface {
     /**
      * @return remaining Diffs
      */
-    public List<BitSet> removeData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli, List<Integer> removedData, boolean[] removed, Set<BitSet> removedDiffs) {
+    public List<Integer> removeData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli, List<Integer> removedData, boolean[] removed, Set<Integer> removedDiffs) {
         int[] diffHash = new int[inversePli.size()];
 
         int initHash = 0;
@@ -136,7 +137,7 @@ public class DifferenceSet implements DifferenceSetInterface {
             // generate removed diff
             for (int i = 0; i < diffHash.length; i++) {
                 if (!removed[i] && diffFreq.addValue(diffHash[i], -1) == 0)
-                    removedDiffs.add(Utils.intToBitSet(nAttributes, diffHash[i]));
+                    removedDiffs.add(diffHash[i]);
             }
         }
 
@@ -146,7 +147,7 @@ public class DifferenceSet implements DifferenceSetInterface {
         return new ArrayList<>(diffSet);
     }
 
-    public List<BitSet> getDiffSet() {
+    public List<Integer> getDiffSet() {
         return new ArrayList<>(diffSet);
     }
 

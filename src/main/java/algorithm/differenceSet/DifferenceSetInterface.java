@@ -6,14 +6,14 @@ import java.util.Set;
 
 public interface DifferenceSetInterface {
 
-    List<BitSet> generateDiffSet(List<List<Integer>> inversePli);
+    List<Integer> generateDiffSet(List<List<Integer>> inversePli);
 
-    List<BitSet> generateDiffSet(List<List<Integer>> inversePli, String diffFp);
+    List<Integer> generateDiffSet(List<List<Integer>> inversePli, String diffFp);
 
-    List<BitSet> insertData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli);
+    List<Integer> insertData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli);
 
-    List<BitSet> removeData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli, List<Integer> removedData, boolean[] removed, Set<BitSet> removedDiffs);
+    List<Integer> removeData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli, List<Integer> removedData, boolean[] removed, Set<Integer> removedDiffs);
 
-    List<BitSet> getDiffSet();
+    List<Integer> getDiffSet();
 
 }

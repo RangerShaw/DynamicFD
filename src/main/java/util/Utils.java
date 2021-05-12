@@ -63,15 +63,6 @@ public class Utils {
         return x;
     }
 
-    public static int countOnes(int n) {
-        int res = 0;
-        while (n != 0) {
-            n &= n - 1;
-            ++res;
-        }
-        return res;
-    }
-
     public static boolean isSubset(BitSet a, BitSet b) {
         BitSet and = (BitSet) a.clone();
         and.and(b);

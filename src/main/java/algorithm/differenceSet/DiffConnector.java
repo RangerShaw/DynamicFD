@@ -15,11 +15,11 @@ public class DiffConnector {
     void initiateDataStructure(List<List<String>> data) {
         int nAttributes = data.isEmpty() ? 0 : data.get(0).size();
         pliClass = new PliClass();
-        differenceSet = nAttributes <= 32 ? new DifferenceSet() : new DifferenceSet64();
-        //differenceSet = new MinDifferenceSet();
+        //differenceSet = nAttributes <= 32 ? new DifferenceSet() : new DifferenceSet64();
+        differenceSet = new DifferenceSet() ;
     }
 
-    public List<BitSet> generatePliAndDiff(List<List<String>> data) {
+    public List<Integer> generatePliAndDiff(List<List<String>> data) {
         initiateDataStructure(data);
 
         pliClass.generatePLI(data);
@@ -33,7 +33,7 @@ public class DiffConnector {
      *
      * @param data input data, each tuple must be unique
      */
-    public List<BitSet> generatePliAndDiff(List<List<String>> data, String diffFp) {
+    public List<Integer> generatePliAndDiff(List<List<String>> data, String diffFp) {
         initiateDataStructure(data);
 
         pliClass.generatePLI(data);
@@ -43,7 +43,7 @@ public class DiffConnector {
     }
 
 
-    public List<BitSet> getDiffSet() {
+    public List<Integer> getDiffSet() {
         return differenceSet.getDiffSet();
     }
 
@@ -51,7 +51,7 @@ public class DiffConnector {
     /**
      * @return new Diffs
      */
-    public List<BitSet> insertData(List<List<String>> insertedData) {
+    public List<Integer> insertData(List<List<String>> insertedData) {
         pliClass.insertData(insertedData);
         return differenceSet.insertData(pliClass.getPli(), pliClass.getInversePli());
     }
@@ -59,14 +59,14 @@ public class DiffConnector {
     /**
      * @return remain Diffs
      */
-    public List<BitSet> removeData(List<Integer> removedData, Set<BitSet> removedDiffs) {
+    public List<Integer> removeData(List<Integer> removedData, Set<Integer> removedDiffs) {
         removedData.sort(Integer::compareTo);
 
         boolean[] removed = new boolean[pliClass.getTupleCount()];
         for (int i : removedData)
             removed[i] = true;
 
-        List<BitSet> leftDiffs = differenceSet.removeData(pliClass.getPli(), pliClass.getInversePli(), removedData, removed, removedDiffs);
+        List<Integer> leftDiffs = differenceSet.removeData(pliClass.getPli(), pliClass.getInversePli(), removedData, removed, removedDiffs);
 
         pliClass.removeData(removedData, removed);
 
