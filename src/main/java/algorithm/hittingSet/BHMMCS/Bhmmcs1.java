@@ -27,14 +27,16 @@ public class Bhmmcs1 {
      * true iff there's an empty int to cover (which could never be covered).
      * return no cover set if true but walk down without the empty int
      */
-    private boolean hasEmptyint = false;
+    private boolean hasEmptySubset = false;
 
     /**
      * record nodes walked to avoid duplication
      */
     private Set<Integer> walked = new HashSet<>();
 
-    List<List<Integer>> subsetParts = new ArrayList<>();
+    List<List<Integer>> minSubsetParts = new ArrayList<>();
+
+    List<Integer> minSubsets = new ArrayList<>();
 
 
     public Bhmmcs1(int nEle) {
@@ -45,42 +47,98 @@ public class Bhmmcs1 {
     }
 
     /**
-     * @param setsToCover unique ints representing ints to be covered
+     * @param subsets unique ints representing ints to be covered
      */
-    public void initiate(List<Integer> setsToCover) {
-        coverNodes = new ArrayList<>();
+    public void initiate(List<Integer> subsets) {
+        removeEmptySubset(subsets, false);
 
-        hasEmptyint = setsToCover.stream().anyMatch(i -> i == 0);
+        minSubsets = initMinSubsets(subsets);
 
-        List<Integer> subsets = setsToCover.stream().filter(i -> i != 0).collect(Collectors.toList());
-
-        BhmmcsNode1 initNode = new BhmmcsNode1(nElements, subsets);
+        BhmmcsNode1 initNode = new BhmmcsNode1(nElements, minSubsets);
 
         walkDown(initNode, coverNodes);
 
         for (int i = 0; i < nElements; i++)
-            subsetParts.add(new ArrayList<>());
-        for (int sb : subsets)
+            minSubsetParts.add(new ArrayList<>());
+        for (int sb : minSubsets)
             for (int e : IntSet.indicesOfOnes(sb))
-                subsetParts.get(e).add(sb);
+                minSubsetParts.get(e).add(sb);
+    }
+
+    List<Integer> initMinSubsets(List<Integer> subsets) {
+        // subsets are already sorted
+        List<Integer> res = new ArrayList<>();
+        boolean[] notMin = new boolean[subsets.size()];
+        int[] cardinalities = subsets.stream().mapToInt(Integer::bitCount).toArray();
+
+        for (int i = 0; i < subsets.size(); i++) {
+            if (notMin[i]) continue;
+            res.add(subsets.get(i));
+            for (int j = subsets.size() - 1; j > i; j--) {
+                if (cardinalities[i] >= cardinalities[j]) break;
+                if (!notMin[j] && IntSet.isSubset(subsets.get(i), subsets.get(j))) notMin[j] = true;
+            }
+        }
+
+        return res;
+    }
+
+    List<Integer> genNewMinSubsets(List<Integer> newSubsets, Set<Integer> rmvMinSubsets) {
+        // newSubsets are already sorted
+        List<Integer> newMinSubsets = new ArrayList<>();    // min subsets of new subsets
+        List<Integer> allMinSubsets = new ArrayList<>();    // min subsets of old and new subsets
+
+        boolean[] notMinNew = new boolean[newSubsets.size()];
+        boolean[] notMinOld = new boolean[minSubsets.size()];
+        int[] cardinalities = newSubsets.stream().mapToInt(Integer::bitCount).toArray();
+
+        int i = 0, j = 0;
+        for (int car = 1; car <= nElements; car++) {
+            if (i == minSubsets.size() && j == newSubsets.size()) break;
+
+            for (; i < minSubsets.size() && Integer.bitCount(minSubsets.get(i)) == car; i++) {   // use old min to filter new min
+                if (notMinOld[i]) {
+                    rmvMinSubsets.add(minSubsets.get(i));
+                    continue;
+                }
+                allMinSubsets.add(minSubsets.get(i));
+                for (int k = newSubsets.size() - 1; k >= 0 && car < cardinalities[k]; k--)
+                    if (!notMinNew[k] && IntSet.isSubset(minSubsets.get(i), newSubsets.get(k))) notMinNew[k] = true;
+            }
+
+            for (; j < newSubsets.size() && cardinalities[j] == car; j++) {                      // use new min to filter old and new min
+                if (notMinNew[j]) continue;
+                int sbj = newSubsets.get(j);
+                allMinSubsets.add(sbj);
+                newMinSubsets.add(sbj);
+                for (int k = minSubsets.size() - 1; k >= 0 && car < Integer.bitCount(minSubsets.get(k)); k--)
+                    if (!notMinOld[k] && IntSet.isSubset(sbj, minSubsets.get(k))) notMinOld[k] = true;
+                for (int k = newSubsets.size() - 1; k >= 0 && car < cardinalities[k]; k--)
+                    if (!notMinNew[k] && IntSet.isSubset(sbj, newSubsets.get(k))) notMinNew[k] = true;
+            }
+        }
+
+        minSubsets = allMinSubsets;
+        return newMinSubsets;
     }
 
     /**
-     * @param insertedSets unique ints representing newly inserted ints to be covered
+     * @param insertedSubsets unique ints representing newly inserted ints to be covered
      */
-    public void insertSubsets(List<Integer> insertedSets) {
+    public void insertSubsets(List<Integer> insertedSubsets) {
         walked.clear();
 
-        hasEmptyint |= insertedSets.stream().anyMatch(sb -> sb == 0);
+        removeEmptySubset(insertedSubsets, false);
 
-        insertedSets.remove((Integer) 0);
+        Set<Integer> rmvMinSubsets = new HashSet<>();
+        List<Integer> newMinSubsets = genNewMinSubsets(insertedSubsets, rmvMinSubsets);
 
-        for (int sb : insertedSets)
+        for (int sb : newMinSubsets)
             for (int e : IntSet.indicesOfOnes(sb))
-                subsetParts.get(e).add(sb);
+                minSubsetParts.get(e).add(sb);
 
         for (BhmmcsNode1 prevNode : coverNodes)
-            prevNode.insertSubsets(insertedSets);
+            prevNode.insertSubsets(newMinSubsets, rmvMinSubsets);
 
         List<BhmmcsNode1> newCoverSets = new ArrayList<>();
         for (BhmmcsNode1 prevNode : coverNodes)
@@ -114,63 +172,71 @@ public class Bhmmcs1 {
         }
     }
 
+    List<Integer> genMinRemovedSubsets(Set<Integer> removed) {
+        List<Integer> minRmvdSubsets = new ArrayList<>();
+
+        for (Integer minSubset : minSubsets)
+            if (removed.contains(minSubset)) minRmvdSubsets.add(minSubset);
+
+        return minRmvdSubsets;
+    }
+
     /**
-     * @param left unique ints representing remained ints after removal
+     * @param leftSubsets unique ints representing remained ints after removal
      */
-    public void removeSubsets(List<Integer> left, List<Integer> removed) {
+    public void removeSubsets(List<Integer> leftSubsets, List<Integer> rmvdSubsets) {
         walked.clear();
 
-        hasEmptyint &= removed.stream().noneMatch(sb -> sb == 0);
+        removeEmptySubset(leftSubsets, false);
+        removeEmptySubset(rmvdSubsets, true);
 
-        List<Integer> leftSubsets = left.stream().filter(sb -> sb != 0).collect(Collectors.toList());
-        List<Integer> removedSubsets = removed.stream().filter(sb -> sb != 0).collect(Collectors.toList());
-        Set<Integer> removedSet = new HashSet<>(removedSubsets);
+        Set<Integer> removed = new HashSet<>(rmvdSubsets);
 
+        // 1 find all min removed subsets and update
         long startTime = System.nanoTime();
-        for (List<Integer> intsWithE : subsetParts)
-            intsWithE.removeAll(removedSet);
+        List<Integer> minRmvdSubsets = genMinRemovedSubsets(removed);
+        Set<Integer> minRemoved = new HashSet<>(minRmvdSubsets);
 
-        for (BhmmcsNode1 nd : coverNodes)
-            nd.removeSubsets(removedSet);
-
-        List<BhmmcsNode1> newCoverSets1 = new ArrayList<>();
-        for (BhmmcsNode1 nd : coverNodes)
-            walkUp(nd, newCoverSets1);
-
-
-        leftSubsets.sort(Comparator.comparing(Integer::bitCount));
-        removedSubsets.sort(Comparator.comparing(Integer::bitCount));
-
-        int[] leftCar = leftSubsets.stream().mapToInt(Integer::bitCount).toArray();
-        int[] removedCar = removedSubsets.stream().mapToInt(Integer::bitCount).toArray();
-
+        minSubsets.removeAll(minRemoved);
+        for (List<Integer> minSubsetPart : minSubsetParts)
+            minSubsetPart.removeAll(minRemoved);
         //System.out.println("time 1: " + ((System.nanoTime() - startTime) / 1000000) + "ms");
 
-        // find all minimal ints in removed
+        // 2 find all min exposed subsets in leftSubsets and update
         startTime = System.nanoTime();
-        List<Integer> minRemovedSets = genMinRemovedSubsets(leftSubsets, removedSubsets, leftCar, removedCar);
+        List<List<Integer>> minExposedSets = genMinExposedSubsets(minRmvdSubsets, leftSubsets);
+        for (List<Integer> exposed : minExposedSets) {
+            for (int sb : exposed) {
+                minSubsets.add(sb);
+                for (int e : IntSet.indicesOfOnes(sb))
+                    minSubsetParts.get(e).add(sb);
+            }
+        }
+        minSubsets = minSubsets.stream().distinct().sorted(Comparator.comparing(Integer::bitCount)).collect(Collectors.toList());
         //System.out.println("time 2: " + ((System.nanoTime() - startTime) / 1000000) + "ms");
 
-        // find all minimal exposed ints in leftSubsets
+        // 3 remove subsets from nodes' crit and walk up if some crit is empty
         startTime = System.nanoTime();
-        List<List<Integer>> minExposedSets = genMinExposedSubsets(minRemovedSets, leftSubsets, leftCar);
-        //System.out.println("time 3: " + ((System.nanoTime() - startTime) / 1000000) + "ms");
+        for (BhmmcsNode1 nd : coverNodes) {
+            nd.removeSubsets(minRemoved);
+            for (int e : nd.redundantEles)
+                nd.removeEle(e, minSubsetParts.get(e));
+        }
+        coverNodes = coverNodes.stream().distinct().collect(Collectors.toList());
 
-
-        // find all coverNode that intersect with minRemovedSets
+        // 4 find all coverNode that intersect with minRemoved
         startTime = System.nanoTime();
         List<BhmmcsNode1> newCoverSets2 = new ArrayList<>();
-
         walked.clear();
 
-        for (BhmmcsNode1 nd : newCoverSets1) {
+        for (BhmmcsNode1 nd : coverNodes) {
             boolean potential = false;
-            for (int i = 0; i < minRemovedSets.size(); i++) {
-                int and = minRemovedSets.get(i) & nd.elements;
-                if (Integer.bitCount(and) > 0 && !minExposedSets.get(i).isEmpty()) {
+            for (int i = 0; i < minRemoved.size(); i++) {
+                int and = minRmvdSubsets.get(i) & nd.elements;
+                if (!minExposedSets.get(i).isEmpty()) {
                     potential = true;
                     for (int e : IntSet.indicesOfOnes(and))
-                        nd.removeEle(e, subsetParts.get(e));
+                        nd.removeEle(e, minSubsetParts.get(e));
                 }
             }
             if (potential) walkDown(nd, newCoverSets2);
@@ -178,35 +244,13 @@ public class Bhmmcs1 {
         }
         //System.out.println("time 4: " + ((System.nanoTime() - startTime) / 1000000) + "ms");
 
-        coverNodes = newCoverSets2.stream().distinct().collect(Collectors.toList());
+        coverNodes = newCoverSets2;
+        //coverNodes = newCoverSets2.stream().distinct().collect(Collectors.toList());
     }
 
-    List<Integer> genMinRemovedSubsets(List<Integer> leftSubsets, List<Integer> removedSubsets, int[] leftCar, int[] removedCar) {
-        List<Integer> minRemovedSets = new ArrayList<>();
-
-        boolean[] isMin = new boolean[removedSubsets.size()];
-        Arrays.fill(isMin, true);
-
-        for (int i = 0; i < leftSubsets.size(); i++) {
-            for (int j = removedSubsets.size() - 1; j >= 0; j--) {
-                if (leftCar[i] >= removedCar[j]) break;
-                if (IntSet.isSubset(leftSubsets.get(i), removedSubsets.get(j))) isMin[j] = false;
-            }
-        }
-
-        for (int i = 0; i < removedSubsets.size() - 1; i++) {
-            if (!isMin[i]) continue;
-            minRemovedSets.add(removedSubsets.get(i));
-            for (int j = removedSubsets.size() - 1; j > i; j--) {
-                if (removedCar[i] >= removedCar[j]) break;
-                if (IntSet.isSubset(removedSubsets.get(i), removedSubsets.get(j))) isMin[j] = false;
-            }
-        }
-        return minRemovedSets;
-    }
-
-    List<List<Integer>> genMinExposedSubsets(List<Integer> minRemovedSets, List<Integer> leftSubsets, int[] leftCar) {
+    List<List<Integer>> genMinExposedSubsets(List<Integer> minRemovedSets, List<Integer> leftSubsets) {
         List<List<Integer>> minExposedSets = new ArrayList<>();
+        int[] leftCar = leftSubsets.stream().mapToInt(Integer::bitCount).toArray();
 
         for (int minRemovedSet : minRemovedSets) {
             List<Integer> exposed = new ArrayList<>();
@@ -237,20 +281,30 @@ public class Bhmmcs1 {
         }
 
         for (int e : nd.redundantEles) {
-            BhmmcsNode1 parentNode = nd.getParentNode(e, subsetParts.get(e));
+            BhmmcsNode1 parentNode = nd.getParentNode(e, minSubsetParts.get(e));
             walkUp(parentNode, newNodes);
         }
     }
 
+    void removeEmptySubset(List<Integer> subsets, boolean remove) {
+        for (int i = 0; i < subsets.size(); i++) {
+            if (subsets.get(i) == 0) {
+                hasEmptySubset = !remove;
+                subsets.remove(i);
+                break;
+            }
+        }
+    }
+
     public List<Integer> getSortedMinCoverSets() {
-        return hasEmptyint ? new ArrayList<>() : coverNodes.stream()
+        return hasEmptySubset ? new ArrayList<>() : coverNodes.stream()
                 .map(BhmmcsNode1::getElements)
                 .sorted()
                 .collect(Collectors.toList());
     }
 
     public List<Integer> getMinCoverSets() {
-        return hasEmptyint ? new ArrayList<>() : coverNodes.stream()
+        return hasEmptySubset ? new ArrayList<>() : coverNodes.stream()
                 .map(BhmmcsNode1::getElements)
                 .collect(Collectors.toList());
     }

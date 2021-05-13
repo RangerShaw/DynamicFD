@@ -81,7 +81,7 @@ public class TestCase {
             // 3.2 update FD
             startTime = System.nanoTime();
             //List<List<BitSet>> currFDs = fdConnector.removeSubsets(leftDiffSet);
-            List<List<BitSet>> currFDs = fdConnector.removeSubsets(leftDiffSet, new ArrayList<>(removedDiffs));
+            List<List<BitSet>> currFDs = fdConnector.removeSubsets(leftDiffSet, removedDiffs);
             fdTimes.add((double) (System.nanoTime() - startTime) / 1000000);
             totalFds.add(currFDs);
             DataIO.printFDs(fdConnector, REMOVE_OUTPUT_DELETED_FD[dataset][i]);
@@ -131,6 +131,7 @@ public class TestCase {
         System.out.println("|  No.  |---------------------------------+--------------------------------------------------|");
         System.out.printf ("|       | %s |       FD       |      Diff      |       FD       |      Total     |\n", isInsert ? "   New Diff   " : "Remaining Diff");
         System.out.println("|-------+----------------+----------------+----------------+----------------+----------------|");
+        //System.out.printf ("| init  |   %10d   |   %10d   |   %10.2f   |   %10.2f   |   %10.2f   |\n", diffSets.get(i).size(), fds.get(i).stream().map(List::size).reduce(0, Integer::sum), diffTimes.get(i), fdTimes.get(i), diffTimes.get(i) + fdTimes.get(i));
         for (int i = 0; i < diffTimes.size(); i++) {
             System.out.printf("|  %2d   |   %10d   |   %10d   |   %10.2f   |   %10.2f   |   %10.2f   |\n", i, diffSets.get(i).size(), fds.get(i).stream().map(List::size).reduce(0, Integer::sum), diffTimes.get(i), fdTimes.get(i), diffTimes.get(i) + fdTimes.get(i));
         }

@@ -4,10 +4,7 @@ import algorithm.hittingSet.BHMMCS.Bhmmcs1;
 import util.Utils;
 import util.IntSet;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class BhmmcsFdConnector1 extends FdConnector {
@@ -30,10 +27,10 @@ public class BhmmcsFdConnector1 extends FdConnector {
 
         //generateSubsetBuckets(toCover);
         toCover.sort(Comparator.comparing(Integer::bitCount));
-        List<List<Integer>> subsetParts = generateSubsetParts(toCover);
+        List<List<Integer>> subsetParts = genSubsetParts(toCover);
 
         for (int rhs = 0; rhs < nElements; rhs++) {
-            List<Integer> diffSets = generateDiffsOnRhs1(subsetParts.get(rhs), rhs);
+            List<Integer> diffSets = genDiffsOnRhs1(subsetParts.get(rhs), rhs);
             bhmmcsList.add(new Bhmmcs1(nElements));
             bhmmcsList.get(rhs).initiate(diffSets);
             minFDs.add(bhmmcsList.get(rhs).getMinCoverSets().stream().map(sb -> Utils.intToBitSet(nElements, sb)).collect(Collectors.toList()));
@@ -41,30 +38,35 @@ public class BhmmcsFdConnector1 extends FdConnector {
     }
 
     public List<List<BitSet>> insertSubsets(List<Integer> addedSets) {
-        List<List<Integer>> subsetParts = generateSubsetParts(addedSets);
+        addedSets.sort(Comparator.comparing(Integer::bitCount));
+        List<List<Integer>> subsetParts = genSubsetParts(addedSets);
 
         for (int rhs = 0; rhs < nElements; rhs++) {
-            List<Integer> newDiffSets = generateDiffsOnRhs1(subsetParts.get(rhs), rhs);
+            List<Integer> newDiffSets = genDiffsOnRhs1(subsetParts.get(rhs), rhs);
             bhmmcsList.get(rhs).insertSubsets(newDiffSets);
             minFDs.set(rhs, bhmmcsList.get(rhs).getMinCoverSets().stream().map(sb -> Utils.intToBitSet(nElements, sb)).collect(Collectors.toList()));
         }
         return new ArrayList<>(minFDs);
     }
 
-    public List<List<BitSet>> removeSubsets(List<Integer> leftDiffSets, List<Integer> removedDiffSets) {
-        List<List<Integer>> leftSubsetParts = generateSubsetParts(leftDiffSets);
-        List<List<Integer>> removedSubsetParts = generateSubsetParts(removedDiffSets);
+    public List<List<BitSet>> removeSubsets(List<Integer> leftDiffs, Set<Integer> removed) {
+        List<Integer> rmvdDiffs = new ArrayList<>(removed);
+
+        leftDiffs.sort(Comparator.comparing(Integer::bitCount));
+        List<List<Integer>> leftSubsetParts = genSubsetParts(leftDiffs);
+        rmvdDiffs.sort(Comparator.comparing(Integer::bitCount));
+        List<List<Integer>> rmvdSubsetParts = genSubsetParts(rmvdDiffs);
 
         for (int rhs = 0; rhs < nElements; rhs++) {
-            List<Integer> leftDiffSet = generateDiffsOnRhs1(leftSubsetParts.get(rhs), rhs);
-            List<Integer> removedDiffSet = generateDiffsOnRhs1(removedSubsetParts.get(rhs), rhs);
+            List<Integer> leftDiffSet = genDiffsOnRhs1(leftSubsetParts.get(rhs), rhs);
+            List<Integer> removedDiffSet = genDiffsOnRhs1(rmvdSubsetParts.get(rhs), rhs);
             bhmmcsList.get(rhs).removeSubsets(leftDiffSet, removedDiffSet);
             minFDs.set(rhs, bhmmcsList.get(rhs).getMinCoverSets().stream().map(sb -> Utils.intToBitSet(nElements, sb)).collect(Collectors.toList()));
         }
         return new ArrayList<>(minFDs);
     }
 
-    void generateSubsetBuckets(List<Integer> subsets) {
+    void genSubsetBuckets(List<Integer> subsets) {
         for (int i = 0; i < nElements + 1; i++)
             subsetBuckets.add(new ArrayList<>());
 
@@ -72,20 +74,20 @@ public class BhmmcsFdConnector1 extends FdConnector {
             subsetBuckets.get(Integer.bitCount(sb)).add(sb);
     }
 
-    List<List<Integer>> generateSubsetParts(List<Integer> subsets) {
+    List<List<Integer>> genSubsetParts(List<Integer> subsets) {
         List<List<Integer>> subsetParts = new ArrayList<>(nElements);
 
         for (int i = 0; i < nElements; i++)
             subsetParts.add(new ArrayList<>());
 
         for (int set : subsets)
-            for(int e : IntSet.indicesOfOnes(set))
+            for (int e : IntSet.indicesOfOnes(set))
                 subsetParts.get(e).add(set);
 
         return subsetParts;
     }
 
-    List<List<List<Integer>>> generateSubsetParts1(List<Integer> subsets) {
+    List<List<List<Integer>>> genSubsetParts1(List<Integer> subsets) {
         List<List<List<Integer>>> subsetParts = new ArrayList<>(nElements);
 
         for (int i = 0; i < nElements; i++) {
@@ -106,17 +108,7 @@ public class BhmmcsFdConnector1 extends FdConnector {
         return subsetParts;
     }
 
-    List<Integer> generateMinDiffsOnRhs1(List<Integer> setsOnRhs, int rhs) {
-        int mask = ~(1 << rhs);
-        List<Integer> diffSetsOnRhs = new ArrayList<>(setsOnRhs.size());
-
-        for (int set : setsOnRhs)
-            diffSetsOnRhs.add(set & mask);
-
-        return diffSetsOnRhs;
-    }
-
-    List<Integer> generateDiffsOnRhs1(List<Integer> sets, int rhs) {
+    List<Integer> genDiffsOnRhs1(List<Integer> sets, int rhs) {
         int mask = ~(1 << rhs);
         List<Integer> diffSetsOnRhs = new ArrayList<>(sets.size());
 

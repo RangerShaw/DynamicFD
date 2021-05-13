@@ -24,7 +24,7 @@ public class BhmmcsNode1 {
     /**
      * crit[i]: ints for which element i is crucial
      */
-    private ArrayList<ArrayList<Integer>> crit;
+    ArrayList<ArrayList<Integer>> crit;
 
     List<Integer> redundantEles;
 
@@ -162,7 +162,7 @@ public class BhmmcsNode1 {
         redundantEles = originalNode.redundantEles.stream().filter(i -> i != e).collect(Collectors.toList());
     }
 
-    void insertSubsets(List<Integer> newSubsets) {
+    void insertSubsets(List<Integer> newSubsets, Set<Integer> rmvMinSubsets) {
         cand = ~elements & Bhmmcs1.elementsMask;
 
         for (int newSb : newSubsets) {
@@ -170,6 +170,9 @@ public class BhmmcsNode1 {
             if (critCover == -1) uncov.add(newSb);
             else if (critCover >= 0) crit.get(critCover).add(newSb);
         }
+
+        for (int e : IntSet.indicesOfOnes(elements))
+            crit.get(e).removeAll(rmvMinSubsets);
     }
 
     void removeSubsets(Set<Integer> removedSets) {
