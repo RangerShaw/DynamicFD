@@ -9,6 +9,7 @@ import java.util.*;
 
 public class DataIO {
 
+
     public static List<List<String>> readCsvFile(String readCsvFilePath) {
         List<List<String>> content = new ArrayList<>();
 
@@ -37,6 +38,39 @@ public class DataIO {
         return res;
     }
 
+    public static HashMap<BitSet, BitSet> readAFD(String dsFilePath) {
+        List<String> lines = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(dsFilePath))) {
+            String s;
+            while ((s = br.readLine()) != null)
+                lines.add(s);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        HashMap<BitSet, BitSet> differnceSetAll = new HashMap<>();
+        int allTuplePair = 0;
+        for (String s : lines) {
+            int index = s.indexOf('-');
+            BitSet bitSet = new BitSet();
+            for (String str : s.substring(0, index).split(",")) {
+                if (str != null && str.length() > 0) bitSet.set(Integer.parseInt(str));
+            }
+            String last = s.substring(index + 2);
+            int index2 = last.indexOf(',');
+            int rhs = Integer.parseInt(last.substring(0,index2));
+            if(differnceSetAll.containsKey(bitSet)){
+                differnceSetAll.get(bitSet).set(rhs, true);
+            }else{
+                BitSet bitSet1 = new BitSet();
+                bitSet1.set(rhs);
+                differnceSetAll.put(bitSet, bitSet1);
+            }
+        }
+
+
+        return differnceSetAll;
+    }
     public static Map<BitSet, Integer> readDiffSetsMap(String dsFilePath) {
         List<String> lines = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(dsFilePath))) {
@@ -48,6 +82,7 @@ public class DataIO {
         }
 
         HashMap<BitSet, Integer> differnceSetAll = new HashMap<>();
+        int allTuplePair = 0;
         for (String s : lines) {
             int index = s.indexOf('}');
             BitSet bitSet = new BitSet();
@@ -56,6 +91,7 @@ public class DataIO {
             }
             differnceSetAll.put(bitSet, Integer.parseInt(s.substring(index + 2)));
         }
+
 
         return differnceSetAll;
     }

@@ -14,9 +14,14 @@ public class MmcsFdConnector extends FdConnector {
     List<Mmcs> MmcsList = new ArrayList<>();
 
 
-    public MmcsFdConnector() {
-    }
+//    public MmcsFdConnector(int nElements) {
+//        super(nElements);
+//        for (int i = 0; i < nElements; i++)
+//            MmcsList.add(new Mmcs(nElements));
+//    }
+    public MmcsFdConnector(){
 
+    }
     /**
      * @param toCover all subsets (different sets) to be covered
      */

@@ -17,6 +17,9 @@ public abstract class FdConnector {
 
     protected FdConnector() {
     }
+    protected FdConnector(int nElements) {
+        this.nElements = nElements;
+    }
 
     public void initiate(int nElements) {
         this.nElements = nElements;
@@ -28,7 +31,7 @@ public abstract class FdConnector {
         for (BitSet diffSet : diffSets) {
             if (diffSet.get(rhs)) {
                 BitSet diffSetRhs = (BitSet) diffSet.clone();
-                diffSetRhs.clear(rhs);
+                //diffSetRhs.clear(rhs);
                 diffSetsOnRhs.add(diffSetRhs);
             }
         }
