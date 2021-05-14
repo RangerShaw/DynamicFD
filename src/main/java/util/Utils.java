@@ -1,7 +1,6 @@
 package util;
 
-import java.util.BitSet;
-import java.util.Comparator;
+import java.util.*;
 
 public class Utils {
 
@@ -18,6 +17,19 @@ public class Utils {
 
             if (lowestDiff == -1) return 0;
             return b.get(lowestDiff) ? 1 : -1;
+        };
+    }
+
+    public static Comparator<Map.Entry<BitSet, Integer>> BitsetMapComparator() {
+        return (a, b) -> {
+            if (a.equals(b)) return 0;
+
+            BitSet xor = (BitSet) a.getKey().clone();
+            xor.xor(b.getKey());
+            int lowestDiff = xor.nextSetBit(0);
+
+            if (lowestDiff == -1) return 0;
+            return b.getKey().get(lowestDiff) ? 1 : -1;
         };
     }
 

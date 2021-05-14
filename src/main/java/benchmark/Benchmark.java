@@ -7,6 +7,7 @@ public class Benchmark {
 
         TestCase.testInsert(dataset);
         TestCase.testRemove(dataset);
+        //TestCase.testDiff(0);
     }
 
 }

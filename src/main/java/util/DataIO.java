@@ -14,7 +14,7 @@ public class DataIO {
 
         try {
             CsvReader csvReader = new CsvReader(readCsvFilePath, ',', StandardCharsets.UTF_8);
-            csvReader.readHeaders();    // 跳过表头
+            csvReader.readHeaders();    // skip the header
             while (csvReader.readRecord())
                 content.add(new ArrayList<>(Arrays.asList(csvReader.getValues())));
             csvReader.close();
@@ -89,4 +89,15 @@ public class DataIO {
         }
     }
 
+    public static void printDiffMap(Map<BitSet, Integer> map, String writeFilePath) {
+        List<Map.Entry<BitSet, Integer>> entries = new ArrayList<>(map.entrySet());
+        entries.sort(Utils.BitsetMapComparator());
+        try (PrintWriter pw = new PrintWriter(new FileWriter(writeFilePath))) {
+            for (var entry : map.entrySet()) {
+                pw.println(entry);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

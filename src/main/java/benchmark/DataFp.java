@@ -88,5 +88,25 @@ public class DataFp {
             }
     };
 
+    /* test Diff */
+
+    static String[] DIFF_INPUT_DATA = new String[] {
+            "dataFiles/letter/diff/letter_15000.csv",
+            "dataFiles/letter/diff/letter_16000.csv",
+            "dataFiles/letter/diff/letter_17000.csv",
+            "dataFiles/letter/diff/letter_18000.csv",
+            "dataFiles/letter/diff/letter_19000.csv",
+            "dataFiles/letter/diff/letter_20000.csv",
+    };
+    static String[] DIFF_OUTPUT_DIFF = new String[] {
+            "dataFiles/letter/diff/letter_DS_15000.csv",
+            "dataFiles/letter/diff/letter_DS_16000.csv",
+            "dataFiles/letter/diff/letter_DS_17000.csv",
+            "dataFiles/letter/diff/letter_DS_18000.csv",
+            "dataFiles/letter/diff/letter_DS_19000.csv",
+            "dataFiles/letter/diff/letter_DS_20000.csv",
+    };
+
+
 
 }

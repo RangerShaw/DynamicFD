@@ -20,4 +20,18 @@ public class IntSet {
         return a == (a & b);
     }
 
+    public static void sortIntSets(int nEles, List<Integer> sets) {
+        List<List<Integer>> buckets = new ArrayList<>(nEles + 1);
+        for (int i = 0; i <= nEles; i++)
+            buckets.add(new ArrayList<>());
+
+        for (int set : sets)
+            buckets.get(Integer.bitCount(set)).add(set);
+
+        sets.clear();
+        for(List<Integer> bucket : buckets)
+            sets.addAll(bucket);
+    }
+
+
 }

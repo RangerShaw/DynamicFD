@@ -28,6 +28,13 @@ public class DiffConnector {
         return differenceSet.getDiffSet();
     }
 
+    public Map<BitSet, Integer> generatePliAndDiffMap(List<List<String>> data) {
+        initiateDataStructure(data);
+
+        pliClass.generatePLI(data);
+        return differenceSet.generateDiffSet(pliClass.getInversePli());
+    }
+
     /**
      * read Diff Set from diffFp directly, generate all other structures as usual
      *
