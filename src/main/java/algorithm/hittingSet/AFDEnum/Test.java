@@ -9,7 +9,6 @@ public class Test {
     public static void main(String[] args) {
 
 
-        //把canhit弄成全文贯穿，只保留一个，不然空间不足
 
         Map<BitSet, Integer> diffSetMap = DataIO.readDiffSetsMap("D:\\Desktop\\DynamicFD\\dataFiles\\letter\\remove\\letter_DS_20000.txt");
         HashMap<Subset, Integer> toCoverNum = new HashMap<>();
@@ -22,7 +21,7 @@ public class Test {
         }
 
         HashMap<BitSet, BitSet> AFD = DataIO.readAFD("D:\\Desktop\\DynamicFD\\dataFiles\\letter\\remove\\letterAFD");
-        MmcsFdConnector mmcs = new MmcsFdConnector(17,0.001);
+        MmcsFdConnector mmcs = new MmcsFdConnector(17,0.01);
         mmcs.initiate(bitSetsToCover, toCoverNum);
         List<List<BitSet>> fd = mmcs.getMinFDs();
         List<Set<BitSet>> fds = new ArrayList<>();
@@ -36,7 +35,14 @@ public class Test {
         }
         System.out.println(fdRes);
 
-        System.out.println("----------------------error  result ----------------------");
+        System.out.println("----------------------over  result ----------------------");
+        /**
+         * pyro 有些结果并不是最小集合，存在错误，
+         * 在error rate = 0.001 中 {1,7,10,13}->0 error rate = 0.004515550777538877
+         * 在pyro的结果中不是最小
+         *
+         * error rate = 0.01 {1, 2, 4}->7 error rate
+         */
         for(int i = 0; i < 17; ++i){
             List<BitSet> lhs = fd.get(i);
             for(BitSet bitSet : lhs){
@@ -48,7 +54,7 @@ public class Test {
             }
         }
 
-        System.out.println("------------------not in result -------------------");
+        System.out.println("------------------not in this result -------------------");
         for(BitSet bitSet : AFD.keySet()){
             BitSet rhs = AFD.get(bitSet);
             int next = rhs.nextSetBit(0);

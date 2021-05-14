@@ -32,9 +32,22 @@ public class MmcsFdConnector extends FdConnector {
         for (Subset subset : toCoverNum.keySet()){
             allPairNum += toCoverNum.get(subset);
         }
+        /**
+         * 计算 {1,7,10,13}->0 error rate = 0.004515550777538877
+         */
         int all1 = 0;
         for(Subset subset : toCoverNum.keySet()){
             if(subset.elements.get(0) && !subset.elements.get(1) && !subset.elements.get(7) && !subset.elements.get(10)&& !subset.elements.get(10)){
+                all1 += toCoverNum.get(subset);
+            }
+        }
+        System.out.println(all1 / (double) allPairNum);
+        /**
+         * 计算 {1,2,4}->7 error rate = 0.009990244512225611
+         */
+        all1 = 0;
+        for(Subset subset : toCoverNum.keySet()){
+            if(subset.elements.get(7) && !subset.elements.get(1) && !subset.elements.get(4) && !subset.elements.get(2)){
                 all1 += toCoverNum.get(subset);
             }
         }
