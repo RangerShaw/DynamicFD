@@ -3,7 +3,7 @@ package algorithm.differenceSet;
 import com.koloboke.collect.map.hash.HashIntIntMap;
 import com.koloboke.collect.map.hash.HashIntIntMaps;
 import util.DataIO;
-import util.IntSet;
+import algorithm.hittingSet.IntSet;
 import util.Utils;
 
 import java.util.*;
@@ -33,7 +33,7 @@ public class DifferenceSet implements DifferenceSetInterface {
         nAttributes = inversePli.isEmpty() ? 0 : inversePli.get(0).size();
 
         for (int i = 0; i < nAttributes; i++)
-            initHash |= (1 << i);
+            initHash |= 1 << i;
     }
 
     public Map<BitSet, Integer> generateDiffSet(List<List<Integer>> inversePli) {
@@ -123,7 +123,8 @@ public class DifferenceSet implements DifferenceSetInterface {
     /**
      * @return remaining Diffs
      */
-    public List<Integer> removeData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli, List<Integer> removedData, boolean[] removed, Set<Integer> removedDiffs) {
+    public Set<Integer> removeData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli, List<Integer> removedData, boolean[] removed) {
+        Set<Integer> removedDiffs = new HashSet<>();
         int[] diffHash = new int[inversePli.size()];
 
         for (int t : removedData) {
@@ -147,7 +148,7 @@ public class DifferenceSet implements DifferenceSetInterface {
         diffSet.removeAll(removedDiffs);
         nTuples -= removed.length;
 
-        return new ArrayList<>(diffSet);
+        return removedDiffs;
     }
 
     public List<Integer> getDiffSet() {

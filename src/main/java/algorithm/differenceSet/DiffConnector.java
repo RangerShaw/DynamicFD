@@ -4,6 +4,8 @@ import java.util.*;
 
 public class DiffConnector {
 
+    public int nElements;
+
     PliClass pliClass;
 
     DifferenceSetInterface differenceSet;
@@ -13,13 +15,12 @@ public class DiffConnector {
     }
 
     void initiateDataStructure(List<List<String>> data) {
-        int nAttributes = data.isEmpty() ? 0 : data.get(0).size();
+        nElements = data.isEmpty() ? 0 : data.get(0).size();
         pliClass = new PliClass();
-        //differenceSet = nAttributes <= 32 ? new DifferenceSet() : new DifferenceSet64();
-        differenceSet = new DifferenceSet() ;
+        differenceSet = nElements <= 32 ? new DifferenceSet() : new DifferenceSet64();
     }
 
-    public List<Integer> generatePliAndDiff(List<List<String>> data) {
+    public List<? extends Number> generatePliAndDiff(List<List<String>> data) {
         initiateDataStructure(data);
 
         pliClass.generatePLI(data);
@@ -40,7 +41,7 @@ public class DiffConnector {
      *
      * @param data input data, each tuple must be unique
      */
-    public List<Integer> generatePliAndDiff(List<List<String>> data, String diffFp) {
+    public List<? extends Number> generatePliAndDiff(List<List<String>> data, String diffFp) {
         initiateDataStructure(data);
 
         pliClass.generatePLI(data);
@@ -50,7 +51,7 @@ public class DiffConnector {
     }
 
 
-    public List<Integer> getDiffSet() {
+    public List<? extends Number> getDiffSet() {
         return differenceSet.getDiffSet();
     }
 
@@ -58,7 +59,7 @@ public class DiffConnector {
     /**
      * @return new Diffs
      */
-    public List<Integer> insertData(List<List<String>> insertedData) {
+    public List<? extends Number> insertData(List<List<String>> insertedData) {
         pliClass.insertData(insertedData);
         return differenceSet.insertData(pliClass.getPli(), pliClass.getInversePli());
     }
@@ -66,14 +67,14 @@ public class DiffConnector {
     /**
      * @return remain Diffs
      */
-    public List<Integer> removeData(List<Integer> removedData, Set<Integer> removedDiffs) {
+    public Set<? extends Number> removeData(List<Integer> removedData) {
         removedData.sort(Integer::compareTo);
 
         boolean[] removed = new boolean[pliClass.getTupleCount()];
         for (int i : removedData)
             removed[i] = true;
 
-        List<Integer> leftDiffs = differenceSet.removeData(pliClass.getPli(), pliClass.getInversePli(), removedData, removed, removedDiffs);
+        Set<? extends Number> leftDiffs = differenceSet.removeData(pliClass.getPli(), pliClass.getInversePli(), removedData, removed);
 
         pliClass.removeData(removedData, removed);
 

@@ -1,6 +1,7 @@
 package util;
 
-import algorithm.hittingSet.fdConnectors.FdConnector;
+import algorithm.hittingSet.fdConnector.BhmmcsFdConnector;
+import algorithm.hittingSet.fdConnector.FdConnector;
 import com.csvreader.CsvReader;
 
 import java.io.*;
@@ -60,7 +61,7 @@ public class DataIO {
         return differnceSetAll;
     }
 
-    public static void printFDs(FdConnector fdConnector, String writeFilePath, boolean append) {
+    public static void printFDs(BhmmcsFdConnector fdConnector, String writeFilePath, boolean append) {
         List<List<BitSet>> fd = fdConnector.getMinFDs();
         for (int i = 0; i < fd.size(); i++) {
             try (PrintWriter pw = new PrintWriter(new FileWriter(writeFilePath, append))) {

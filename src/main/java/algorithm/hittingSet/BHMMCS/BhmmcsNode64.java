@@ -5,45 +5,45 @@ import algorithm.hittingSet.IntSet;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class BhmmcsNode {
+public class BhmmcsNode64 {
 
     private int nElements;
 
     /**
      * elements of current node
      */
-    int elements;
+    long elements;
 
-    private int cand;
+    private long cand;
 
     /**
      * uncovered ints
      */
-    private List<Integer> uncov;
+    private List<Long> uncov;
 
     /**
      * crit[i]: ints for which element i is crucial
      */
-    ArrayList<ArrayList<Integer>> crit;
+    ArrayList<ArrayList<Long>> crit;
 
     List<Integer> redundantEles;
 
 
-    private BhmmcsNode(int nEle) {
+    private BhmmcsNode64(int nEle) {
         nElements = nEle;
     }
 
     /**
      * for initiation only
      */
-    BhmmcsNode(int nEle, List<Integer> intsToCover) {
+    BhmmcsNode64(int nEle, List<Long> intsToCover) {
         nElements = nEle;
         elements = 0;
         uncov = new ArrayList<>(intsToCover);
 
         cand = 0;
         for (int i = 0; i < nElements; i++)
-            cand |= 1 << i;
+            cand |= 1L << i;
 
         crit = new ArrayList<>(nElements);
         for (int i = 0; i < nElements; i++)
@@ -52,19 +52,20 @@ public class BhmmcsNode {
 
     @Override
     public int hashCode() {
-        return elements;
+        // TODO: avoid hashCode
+        return (int) elements;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof BhmmcsNode && ((BhmmcsNode) obj).elements == elements;
+        return obj instanceof BhmmcsNode64 && ((BhmmcsNode64) obj).elements == elements;
     }
 
-    int getElements() {
+    long getElements() {
         return elements;
     }
 
-    int getCand() {
+    long getCand() {
         return cand;
     }
 
@@ -80,8 +81,8 @@ public class BhmmcsNode {
      * find an uncovered int with the optimal intersection with cand,
      * return its intersection with cand
      */
-    int getAddCandidates() {
-        Comparator<Integer> cmp = Comparator.comparing(sb -> Integer.bitCount(cand & sb));
+    long getAddCandidates() {
+        Comparator<Long> cmp = Comparator.comparing(sb -> Long.bitCount(cand & sb));
 
         /* different strategies: min may be the fastest */
         // return cand & Collections.max(uncov, cmp);
@@ -89,14 +90,14 @@ public class BhmmcsNode {
         return cand & Collections.min(uncov, cmp);
     }
 
-    BhmmcsNode getChildNode(int e, int childCand) {
-        BhmmcsNode childNode = new BhmmcsNode(nElements);
+    BhmmcsNode64 getChildNode(int e, long childCand) {
+        BhmmcsNode64 childNode = new BhmmcsNode64(nElements);
         childNode.cloneContextFromParent(childCand, this);
         childNode.updateContextFromParent(e, this);
         return childNode;
     }
 
-    void cloneContextFromParent(int outerCand, BhmmcsNode originalNode) {
+    void cloneContextFromParent(long outerCand, BhmmcsNode64 originalNode) {
         elements = originalNode.elements;
         cand = outerCand;
 
@@ -106,33 +107,33 @@ public class BhmmcsNode {
         }
     }
 
-    void updateContextFromParent(int e, BhmmcsNode parentNode) {
+    void updateContextFromParent(int e, BhmmcsNode64 parentNode) {
         uncov = new ArrayList<>();
 
-        for (int sb : parentNode.uncov) {
-            if ((sb & (1 << e)) != 0) crit.get(e).add(sb);
+        for (long sb : parentNode.uncov) {
+            if ((sb & (1L << e)) != 0) crit.get(e).add(sb);
             else uncov.add(sb);
         }
 
         for (int u : IntSet.indicesOfOnes(elements))
-            crit.get(u).removeIf(F -> (F & (1 << e)) != 0);
+            crit.get(u).removeIf(F -> (F & (1L << e)) != 0);
 
-        elements |= 1 << e;
+        elements |= 1L << e;
     }
 
-    BhmmcsNode getParentNode(int e, List<Integer> intsWithE) {
-        BhmmcsNode parentNode = new BhmmcsNode(nElements);
+    BhmmcsNode64 getParentNode(int e, List<Long> intsWithE) {
+        BhmmcsNode64 parentNode = new BhmmcsNode64(nElements);
         parentNode.updateContextFromChild(e, this, intsWithE);
         return parentNode;
     }
 
-    BhmmcsNode removeEle(int e, List<Integer> intsWithE) {
-        elements &= ~(1 << e);
+    BhmmcsNode64 removeEle(int e, List<Long> intsWithE) {
+        elements &= ~(1L << e);
 
         cand = (~elements) & Bhmmcs.elementsMask;
 
         crit.get(e).clear();
-        for (int sb : intsWithE) {
+        for (long sb : intsWithE) {
             if ((sb & elements) == 0) uncov.add(sb);
             else {
                 int critCover = getCritCover(sb);
@@ -143,9 +144,9 @@ public class BhmmcsNode {
         return this;
     }
 
-    void updateContextFromChild(int e, BhmmcsNode originalNode, List<Integer> intsWithE) {
+    void updateContextFromChild(int e, BhmmcsNode64 originalNode, List<Long> intsWithE) {
         elements = originalNode.elements;
-        elements &= ~(1 << e);
+        elements &= ~(1L << e);
 
         cand = (~elements) & Bhmmcs.elementsMask;
 
@@ -154,7 +155,7 @@ public class BhmmcsNode {
         crit = new ArrayList<>(nElements);
         for (int i = 0; i < nElements; i++)
             crit.add(new ArrayList<>(originalNode.crit.get(i)));
-        for (int sb : intsWithE) {
+        for (long sb : intsWithE) {
             int critCover = getCritCover(sb);
             if (critCover >= 0) crit.get(critCover).add(sb);
         }
@@ -162,10 +163,10 @@ public class BhmmcsNode {
         redundantEles = originalNode.redundantEles.stream().filter(i -> i != e).collect(Collectors.toList());
     }
 
-    void insertSubsets(List<Integer> newSubsets, Set<Integer> rmvMinSubsets) {
+    void insertSubsets(List<Long> newSubsets, Set<Long> rmvMinSubsets) {
         cand = ~elements & Bhmmcs.elementsMask;
 
-        for (int newSb : newSubsets) {
+        for (long newSb : newSubsets) {
             int critCover = getCritCover(newSb);
             if (critCover == -1) uncov.add(newSb);
             else if (critCover >= 0) crit.get(critCover).add(newSb);
@@ -175,7 +176,7 @@ public class BhmmcsNode {
             crit.get(e).removeAll(rmvMinSubsets);
     }
 
-    void removeSubsets(Set<Integer> removedSets) {
+    void removeSubsets(Set<Long> removedSets) {
         cand = ~elements & Bhmmcs.elementsMask;
 
         redundantEles = new ArrayList<>();
@@ -189,11 +190,11 @@ public class BhmmcsNode {
     /**
      * @return -1 iff sb is NOT covered by this node; -2 iff sb is covered by at least 2 elements
      */
-    int getCritCover(int sb) {
-        int and = sb & elements;
+    int getCritCover(long sb) {
+        long and = sb & elements;
         if (and == 0) return -1;
 
-        int ffs = Integer.numberOfTrailingZeros(and);
-        return and == (1 << ffs) ? ffs : -2;
+        int ffs = Long.numberOfTrailingZeros(and);
+        return and == (1L << ffs) ? ffs : -2;
     }
 }
