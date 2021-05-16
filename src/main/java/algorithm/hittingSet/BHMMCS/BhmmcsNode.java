@@ -125,7 +125,7 @@ public class BhmmcsNode {
         return parentNode;
     }
 
-    BhmmcsNode removeEle(int e, List<Integer> intsWithE) {
+    void removeEle(int e, List<Integer> intsWithE) {
         elements &= ~(1 << e);
 
         cand = (~elements) & Bhmmcs.elementsMask;
@@ -138,8 +138,6 @@ public class BhmmcsNode {
                 if (critCover >= 0) crit.get(critCover).add(sb);
             }
         }
-
-        return this;
     }
 
     void updateContextFromChild(int e, BhmmcsNode originalNode, List<Integer> intsWithE) {

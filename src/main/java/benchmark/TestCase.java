@@ -57,7 +57,7 @@ public class TestCase {
             List<List<BitSet>> currFDs = fdConnector.insertSubsets(newDiffs);
             fdTimes.add((double) (System.nanoTime() - startTime) / 1000000);
             totalFds.add(currFDs);
-            DataIO.printFDs(fdConnector, INSERT_OUTPUT_NEW_FD[dataset][i]);
+            //DataIO.printFDs(fdConnector, INSERT_OUTPUT_NEW_FD[dataset][i]);
         }
 
         // 4 print result and time
@@ -96,7 +96,7 @@ public class TestCase {
             List<List<BitSet>> currFDs = fdConnector.removeSubsets(leftDiffSet, removedDiffs);
             fdTimes.add((double) (System.nanoTime() - startTime) / 1000000);
             totalFds.add(currFDs);
-            DataIO.printFDs(fdConnector, REMOVE_OUTPUT_DELETED_FD[dataset][i]);
+            //DataIO.printFDs(fdConnector, REMOVE_OUTPUT_DELETED_FD[dataset][i]);
         }
 
         // 4 print result and time
@@ -118,29 +118,10 @@ public class TestCase {
 
     static FdConnector initiateFd(int nElements, List<? extends Number> initDiffSets) {
         // initiate FD
-        //FdConnector fdConnector = nElements <= 32 ? new BhmmcsFdConnector() : new BhmmcsFdConnector64();
-        FdConnector fdConnector = new BhmmcsFdConnector64();
+        FdConnector fdConnector = nElements <= 32 ? new BhmmcsFdConnector() : new BhmmcsFdConnector64();
         fdConnector.initiate(nElements, initDiffSets);
         System.out.println("  # of initial FD: " + fdConnector.getMinFDs().stream().map(List::size).reduce(0, Integer::sum));
 
-        return fdConnector;
-    }
-
-    static FdConnector initiate(DiffConnector diffConnector, String INPUT_BASE_DATA, String INPUT_BASE_DIFF, String OUTPUT_BASE_FD) {
-        // load base data
-        System.out.println("[INITIALIZING]...");
-        List<List<String>> csvData = DataIO.readCsvFile(INPUT_BASE_DATA);
-
-        // initiate pli and differenceSet
-        List<? extends Number> initDiffSets = diffConnector.generatePliAndDiff(csvData, INPUT_BASE_DIFF);
-        System.out.println("  # of initial Diff: " + initDiffSets.size());
-
-        // initiate FD
-        FdConnector fdConnector = csvData.get(0).size() <= 32 ? new BhmmcsFdConnector() : new BhmmcsFdConnector64();
-        fdConnector.initiate(csvData.get(0).size(), initDiffSets);
-        System.out.println("  # of initial FD: " + fdConnector.getMinFDs().stream().map(List::size).reduce(0, Integer::sum));
-
-        DataIO.printFDs(fdConnector, OUTPUT_BASE_FD);
         return fdConnector;
     }
 

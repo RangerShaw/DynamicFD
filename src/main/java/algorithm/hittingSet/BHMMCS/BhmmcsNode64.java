@@ -126,7 +126,7 @@ public class BhmmcsNode64 {
         return parentNode;
     }
 
-    BhmmcsNode64 removeEle(int e, List<Long> intsWithE) {
+    void removeEle(int e, List<Long> intsWithE) {
         elements &= ~(1L << e);
 
         cand = (~elements) & Bhmmcs64.elementsMask;
@@ -139,8 +139,6 @@ public class BhmmcsNode64 {
                 if (critCover >= 0) crit.get(critCover).add(sb);
             }
         }
-
-        return this;
     }
 
     void updateContextFromChild(int e, BhmmcsNode64 originalNode, List<Long> intsWithE) {
