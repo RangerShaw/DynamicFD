@@ -140,20 +140,21 @@ public class Bhmmcs {
         for (BhmmcsNode prevNode : coverNodes)
             prevNode.insertSubsets(newMinSubsets, rmvMinSubsets);
 
-        List<BhmmcsNode> newCoverSets = new ArrayList<>();
+        List<BhmmcsNode> newCoverNodes = new ArrayList<>();
         for (BhmmcsNode prevNode : coverNodes)
-            walkDown(prevNode, newCoverSets);
+            walkDown(prevNode, newCoverNodes);
 
-        coverNodes = newCoverSets;
+        coverNodes = newCoverNodes;
     }
 
     /**
      * down from nd on the search tree, find all minimal hitting sets
      */
     void walkDown(BhmmcsNode nd, List<BhmmcsNode> newNodes) {
-        if (!walked.add(nd.hashCode())) return;
+        if (!walked.add(nd.elements)) return;
 
         if (nd.isCover()) {
+            nd.resetCand();
             newNodes.add(nd);
             return;
         }
@@ -202,59 +203,77 @@ public class Bhmmcs {
             minSubsetPart.removeAll(minRemoved);
 
         // 2 find all min exposed subsets in leftSubsets and update
-        List<List<Integer>> minExposedSets = genMinExposedSubsets(minRmvdSubsets, leftSubsets);
-        for (List<Integer> exposed : minExposedSets) {
-            for (int sb : exposed) {
-                minSubsets.add(sb);
-                for (int e : IntSet.indicesOfOnes(sb))
-                    minSubsetParts.get(e).add(sb);
-            }
+        boolean[] hasExposed = new boolean[minRmvdSubsets.size()];
+        List<Integer> minExposedSets = genMinExposedSubsets(minRmvdSubsets, leftSubsets, hasExposed);
+
+        for (int sb : minExposedSets) {
+            minSubsets.add(sb);
+            for (int e : IntSet.indicesOfOnes(sb))
+                minSubsetParts.get(e).add(sb);
         }
+
         minSubsets = minSubsets.stream().distinct().collect(Collectors.toList());
         IntSet.sortIntSets(nElements, minSubsets);
 
         // 3 remove subsets from nodes' crit and walk up if some crit is empty
-        for (BhmmcsNode nd : coverNodes) {
-            nd.removeSubsets(minRemoved);
-            for (int e : nd.redundantEles)
-                nd.removeEle(e, minSubsetParts.get(e));
-        }
-        coverNodes = coverNodes.stream().distinct().collect(Collectors.toList());
+        coverNodes = removeSubsetsFromNodes(minRemoved);
         //System.out.println("time 3: " + ((System.nanoTime() - startTime) / 1000000) + "ms");
 
         // 4 find all coverNode that intersect with minRemoved and re-walk
         startTime = System.nanoTime();
-        coverNodes = rewalk(minRmvdSubsets, minExposedSets);
-        //System.out.println("time 4: " + ((System.nanoTime() - startTime) / 1000000) + "ms");
-        //coverNodes = newCoverSets2.stream().distinct().collect(Collectors.toList());
+        coverNodes = rewalk(minRmvdSubsets, hasExposed);
+        // System.out.println("time 4: " + ((System.nanoTime() - startTime) / 1000000) + "ms");
     }
 
-    List<BhmmcsNode> rewalk(List<Integer> minRmvdSubsets, List<List<Integer>> minExposedSets) {
-        List<BhmmcsNode> newCoverSets2 = new ArrayList<>();
-        walked.clear();
+    List<BhmmcsNode> removeSubsetsFromNodes(Set<Integer> minRemoved) {
+        List<BhmmcsNode> newCoverNodes = new ArrayList<>();
+        Set<Integer> existNodes = new HashSet<>();
 
         for (BhmmcsNode nd : coverNodes) {
-            boolean potential = false;
-            for (int i = 0; i < minRmvdSubsets.size(); i++) {
-                int and = minRmvdSubsets.get(i) & nd.elements;
-                if (!minExposedSets.get(i).isEmpty()) {
-                    potential = true;
-                    for (int e : IntSet.indicesOfOnes(and))
-                        nd.removeEle(e, minSubsetParts.get(e));
-                }
+            List<Integer> redundantEles = nd.removeSubsets(minRemoved);
+            if (existNodes.add(nd.getParentElements(redundantEles))) {
+                for (int e : redundantEles)
+                    nd.removeEle(e, minSubsetParts.get(e));
+                newCoverNodes.add(nd);
             }
-            if (potential) walkDown(nd, newCoverSets2);
-            else newCoverSets2.add(nd);
         }
-        return newCoverSets2;
+
+        return newCoverNodes;
     }
 
-    List<List<Integer>> genMinExposedSubsets(List<Integer> minRemovedSets, List<Integer> leftSubsets) {
-        List<List<Integer>> minExposedSets = new ArrayList<>();
+    List<BhmmcsNode> rewalk(List<Integer> minRmvdSubsets, boolean[] hasExposed) {
+        // remove elements appearing in minRmvdSubsets that have exposed subsets
+        List<BhmmcsNode> newCoverNodes1 = new ArrayList<>();
+
+        int removeCand = 0;
+        for (int i = 0; i < minRmvdSubsets.size(); i++)
+            if (hasExposed[i]) removeCand |= minRmvdSubsets.get(i);
+        List<Integer> removeEles = IntSet.indicesOfOnes(removeCand);
+
+        Set<Integer> existNodes = new HashSet<>();
+        for (BhmmcsNode nd : coverNodes) {
+            if (existNodes.add(nd.getParentElements(removeCand))) {
+                for (int e : removeEles)
+                    nd.removeEle(e, minSubsetParts.get(e));
+                newCoverNodes1.add(nd);
+            }
+        }
+
+        // walk down
+        walked.clear();
+        List<BhmmcsNode> newCoverNodes2 = new ArrayList<>();
+        for (BhmmcsNode nd : newCoverNodes1)
+            walkDown(nd, newCoverNodes2);
+
+        return newCoverNodes2;
+    }
+
+    List<Integer> genMinExposedSubsets(List<Integer> minRemovedSets, List<Integer> leftSubsets, boolean[] hasExposed) {
+        Set<Integer> minExposedSets = new HashSet<>();
         int[] leftCar = leftSubsets.stream().mapToInt(Integer::bitCount).toArray();
 
-        for (int minRemovedSet : minRemovedSets) {
-            List<Integer> exposed = new ArrayList<>();
+        for (int i = 0; i < minRemovedSets.size(); i++) {
+            int minRemovedSet = minRemovedSets.get(i);
             for (int j = leftSubsets.size() - 1; j >= 0; j--) {
                 if (Integer.bitCount(minRemovedSet) >= leftCar[j]) break;
                 if (IntSet.isSubset(minRemovedSet, leftSubsets.get(j))) {
@@ -265,26 +284,14 @@ public class Bhmmcs {
                             break;
                         }
                     }
-                    if (min) exposed.add(leftSubsets.get(j));
+                    if (min) {
+                        hasExposed[i] = true;
+                        minExposedSets.add(leftSubsets.get(j));
+                    }
                 }
             }
-            minExposedSets.add(exposed);
         }
-        return minExposedSets;
-    }
-
-    void walkUp(BhmmcsNode nd, List<BhmmcsNode> newNodes) {
-        if (!walked.add(nd.hashCode())) return;
-
-        if (nd.isGlobalMinimal()) {
-            newNodes.add(nd);
-            return;
-        }
-
-        for (int e : nd.redundantEles) {
-            BhmmcsNode parentNode = nd.getParentNode(e, minSubsetParts.get(e));
-            walkUp(parentNode, newNodes);
-        }
+        return new ArrayList<>(minExposedSets);
     }
 
     void removeEmptySubset(List<Integer> subsets, boolean remove) {

@@ -14,7 +14,7 @@ public class BhmmcsNode {
      */
     int elements;
 
-    private int cand;
+    int cand;
 
     /**
      * uncovered ints
@@ -25,8 +25,6 @@ public class BhmmcsNode {
      * crit[i]: ints for which element i is crucial
      */
     ArrayList<ArrayList<Integer>> crit;
-
-    List<Integer> redundantEles;
 
 
     private BhmmcsNode(int nEle) {
@@ -126,17 +124,18 @@ public class BhmmcsNode {
     }
 
     void removeEle(int e, List<Integer> intsWithE) {
+        if ((elements & (1 << e)) == 0) return;
+
         elements &= ~(1 << e);
 
         cand = (~elements) & Bhmmcs.elementsMask;
 
         crit.get(e).clear();
+
         for (int sb : intsWithE) {
-            if ((sb & elements) == 0) uncov.add(sb);
-            else {
-                int critCover = getCritCover(sb);
-                if (critCover >= 0) crit.get(critCover).add(sb);
-            }
+            int critCover = getCritCover(sb);
+            if (critCover == -1) uncov.add(sb);
+            else if (critCover >= 0) crit.get(critCover).add(sb);
         }
     }
 
@@ -155,13 +154,9 @@ public class BhmmcsNode {
             int critCover = getCritCover(sb);
             if (critCover >= 0) crit.get(critCover).add(sb);
         }
-
-        redundantEles = originalNode.redundantEles.stream().filter(i -> i != e).collect(Collectors.toList());
     }
 
     void insertSubsets(List<Integer> newSubsets, Set<Integer> rmvMinSubsets) {
-        cand = ~elements & Bhmmcs.elementsMask;
-
         for (int newSb : newSubsets) {
             int critCover = getCritCover(newSb);
             if (critCover == -1) uncov.add(newSb);
@@ -172,15 +167,32 @@ public class BhmmcsNode {
             crit.get(e).removeAll(rmvMinSubsets);
     }
 
-    void removeSubsets(Set<Integer> removedSets) {
+    List<Integer> removeSubsets(Set<Integer> removedSets) {
         cand = ~elements & Bhmmcs.elementsMask;
 
-        redundantEles = new ArrayList<>();
+        List<Integer> redundantEles = new ArrayList<>();
 
         for (int e : IntSet.indicesOfOnes(elements)) {
             crit.get(e).removeIf(removedSets::contains);
             if (crit.get(e).isEmpty()) redundantEles.add(e);
         }
+
+        return redundantEles;
+    }
+
+    int getParentElements(List<Integer> redundantEles) {
+        int parentElements = elements;
+        for (int i : redundantEles)
+            parentElements &= ~(1 << i);
+        return parentElements;
+    }
+
+    int getParentElements(int redundantEles) {
+        return elements & ~redundantEles;
+    }
+
+    void resetCand() {
+        cand = ~elements & Bhmmcs.elementsMask;
     }
 
     /**
