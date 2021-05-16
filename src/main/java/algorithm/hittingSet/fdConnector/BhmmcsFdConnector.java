@@ -1,8 +1,8 @@
 package algorithm.hittingSet.fdConnector;
 
 import algorithm.hittingSet.BHMMCS.Bhmmcs;
-import util.Utils;
 import algorithm.hittingSet.IntSet;
+import util.Utils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,12 +12,12 @@ public class BhmmcsFdConnector implements FdConnector{
     /**
      * number of elements or attributes
      */
-    protected int nElements;
+    int nElements;
 
     /**
      * minimal FD on each rhs
      */
-    protected List<List<BitSet>> minFDs = new ArrayList<>();
+    List<List<BitSet>> minFDs = new ArrayList<>();
 
     /**
      * Bhmmcs algorithms on different rhs

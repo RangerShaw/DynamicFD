@@ -14,7 +14,7 @@ public class BhmmcsNode64 {
      */
     long elements;
 
-    private long cand;
+    long cand;
 
     /**
      * uncovered ints
@@ -102,9 +102,8 @@ public class BhmmcsNode64 {
         cand = outerCand;
 
         crit = new ArrayList<>(nElements);
-        for (int i = 0; i < nElements; i++) {
+        for (int i = 0; i < nElements; i++)
             crit.add(new ArrayList<>(originalNode.crit.get(i)));
-        }
     }
 
     void updateContextFromParent(int e, BhmmcsNode64 parentNode) {
@@ -130,7 +129,7 @@ public class BhmmcsNode64 {
     BhmmcsNode64 removeEle(int e, List<Long> intsWithE) {
         elements &= ~(1L << e);
 
-        cand = (~elements) & Bhmmcs.elementsMask;
+        cand = (~elements) & Bhmmcs64.elementsMask;
 
         crit.get(e).clear();
         for (long sb : intsWithE) {
@@ -148,7 +147,7 @@ public class BhmmcsNode64 {
         elements = originalNode.elements;
         elements &= ~(1L << e);
 
-        cand = (~elements) & Bhmmcs.elementsMask;
+        cand = (~elements) & Bhmmcs64.elementsMask;
 
         uncov = new ArrayList<>();
 
@@ -164,7 +163,7 @@ public class BhmmcsNode64 {
     }
 
     void insertSubsets(List<Long> newSubsets, Set<Long> rmvMinSubsets) {
-        cand = ~elements & Bhmmcs.elementsMask;
+        cand = ~elements & Bhmmcs64.elementsMask;
 
         for (long newSb : newSubsets) {
             int critCover = getCritCover(newSb);
@@ -177,7 +176,7 @@ public class BhmmcsNode64 {
     }
 
     void removeSubsets(Set<Long> removedSets) {
-        cand = ~elements & Bhmmcs.elementsMask;
+        cand = ~elements & Bhmmcs64.elementsMask;
 
         redundantEles = new ArrayList<>();
 

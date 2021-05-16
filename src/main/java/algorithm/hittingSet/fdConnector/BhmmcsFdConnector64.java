@@ -4,10 +4,7 @@ import algorithm.hittingSet.BHMMCS.Bhmmcs64;
 import algorithm.hittingSet.IntSet;
 import util.Utils;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class BhmmcsFdConnector64 implements FdConnector {

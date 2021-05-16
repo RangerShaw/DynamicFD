@@ -2,10 +2,7 @@ package algorithm.hittingSet.BHMMCS;
 
 import algorithm.hittingSet.IntSet;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -293,7 +290,7 @@ public class Bhmmcs64 {
 
     void removeEmptySubset(List<Long> subsets, boolean remove) {
         for (int i = 0; i < subsets.size(); i++) {
-            if (subsets.get(i) == 0) {
+            if (subsets.get(i) == 0L) {
                 hasEmptySubset = !remove;
                 subsets.remove(i);
                 break;

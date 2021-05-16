@@ -101,9 +101,8 @@ public class BhmmcsNode {
         cand = outerCand;
 
         crit = new ArrayList<>(nElements);
-        for (int i = 0; i < nElements; i++) {
+        for (int i = 0; i < nElements; i++)
             crit.add(new ArrayList<>(originalNode.crit.get(i)));
-        }
     }
 
     void updateContextFromParent(int e, BhmmcsNode parentNode) {

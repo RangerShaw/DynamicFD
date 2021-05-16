@@ -20,7 +20,7 @@ public class IntSet {
         List<Integer> res = new ArrayList<>();
         int pos = 0;
         while (n > 0) {
-            if ((n & 1) != 0) res.add(pos);
+            if ((n & 1) != 0L) res.add(pos);
             pos++;
             n >>>= 1;
         }

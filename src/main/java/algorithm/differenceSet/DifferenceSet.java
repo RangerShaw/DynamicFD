@@ -79,10 +79,6 @@ public class DifferenceSet implements DifferenceSetInterface {
     public List<Integer> insertData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli) {
         int[] diffHash = new int[inversePli.size()];
 
-        int initHash = 0;
-        for (int i = 0; i < nAttributes; i++)
-            initHash |= (1 << i);
-
         List<Integer> newDiffs = new ArrayList<>();
 
         // for each newly inserted tuple, generate its diffs with all front tuples
