@@ -4,27 +4,50 @@ import algorithm.differenceSet.DiffConnector;
 import algorithm.hittingSet.fdConnector.BhmmcsFdConnector;
 import algorithm.hittingSet.fdConnector.BhmmcsFdConnector64;
 import algorithm.hittingSet.fdConnector.FdConnector;
+import me.tongfei.progressbar.ProgressBar;
 import util.DataIO;
+import util.Utils;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 import static benchmark.DataFp.*;
 
 public class TestCase {
 
     public static void testDiff(int dataset) {
-        for (int d = 2; d < 6; d++) {
+        for (int d = 0, size = DIFF_INPUT_DATA[dataset].length; d < size; d++) {
             DiffConnector diffConnector = new DiffConnector();
             // load base data
             System.out.println("[INITIALIZING]...");
-            List<List<String>> csvData = DataIO.readCsvFile(DIFF_INPUT_DATA[d]);
+            List<List<String>> csvData = DataIO.readCsvFile(DIFF_INPUT_DATA[dataset][d]);
 
             // initiate pli and differenceSet
-            Map<BitSet, Integer> diffMap = diffConnector.generatePliAndDiffMap(csvData);
+            Map<BitSet, Long> diffMap = diffConnector.generatePliAndDiffMap(csvData);
             System.out.println("Size of diff: " + diffMap.size());
-            DataIO.printDiffMap(diffMap, DIFF_OUTPUT_DIFF[d]);
+            DataIO.printDiffMap(diffMap, DIFF_OUTPUT_DIFF[dataset][d]);
         }
     }
+
+    public static void testInsertDiff(int dataset) {
+        DiffConnector diffConnector = initiateDiff(INSERT_INPUT_BASE_DATA[dataset], INSERT_INPUT_BASE_DIFF[dataset]);
+
+        // load inserted data all at once
+        List<List<List<String>>> insertDatas = new ArrayList<>();
+        for (String fp : INSERT_INPUT_NEW_DATA[dataset])
+            insertDatas.add(DataIO.readCsvFile(fp));
+
+        // insert data and output diff
+        System.out.println("[INSERTING]...");
+
+        ProgressBar.wrap(IntStream.range(0, insertDatas.size()), "testInsertDiff").forEach(i -> {
+            List<Integer> newDiffs = (List<Integer>) diffConnector.insertData(insertDatas.get(i));
+            for (int sb : newDiffs)
+                System.out.println(Utils.intToBitSet(diffConnector.nElements, sb));
+            DataIO.printIntDiffMap(diffConnector.nElements, diffConnector.getDiffFreq(), INSERT_OUTPUT_CURR_DIFF[dataset][i]);
+        });
+    }
+
 
     public static void testInsert(int dataset) {
         // 1 initiate
@@ -57,7 +80,7 @@ public class TestCase {
             List<List<BitSet>> currFDs = fdConnector.insertSubsets(newDiffs);
             fdTimes.add((double) (System.nanoTime() - startTime) / 1000000);
             totalFds.add(currFDs);
-            //DataIO.printFDs(fdConnector, INSERT_OUTPUT_NEW_FD[dataset][i]);
+            DataIO.printFDs(fdConnector, INSERT_OUTPUT_CURR_FD[dataset][i]);
         }
 
         // 4 print result and time
@@ -68,6 +91,7 @@ public class TestCase {
         // 1 initiate
         DiffConnector diffConnector = initiateDiff(REMOVE_INPUT_BASE_DATA[dataset], REMOVE_INPUT_BASE_DIFF[dataset]);
         FdConnector fdConnector = initiateFd(diffConnector.nElements, diffConnector.getDiffSet());
+        //DataIO.printFDs(fdConnector, REMOVE_OUTPUT_BASE_FD[dataset]);
 
         // 2 load removed data all at once
         List<List<Integer>> removedDatas = new ArrayList<>();

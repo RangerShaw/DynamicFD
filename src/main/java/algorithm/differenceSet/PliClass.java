@@ -4,7 +4,7 @@ import java.util.*;
 
 public class PliClass {
 
-    public int nTuples;
+    public int nTuples = 0;
 
     public int nAttributes;
 
@@ -32,15 +32,16 @@ public class PliClass {
         nTuples = data.size();
         nAttributes = data.isEmpty() ? 0 : data.get(0).size();
 
-        for (int i = 0; i < nAttributes; i++) {
+        for (int e = 0; e < nAttributes; e++) {
             pli.add(new ArrayList<>());
             pliMap.add(new HashMap<>());
         }
+
         for (int t = 0; t < nTuples; t++)
             inversePli.add(new ArrayList<>(nAttributes));
     }
 
-    List<List<List<Integer>>> generatePLI(List<List<String>> data) {
+    public List<List<List<Integer>>> generatePLI(List<List<String>> data) {
         initiateDataStructure(data);
 
         for (int e = 0; e < nAttributes; e++) {
@@ -62,16 +63,17 @@ public class PliClass {
         return pli;
     }
 
-    public List<List<List<Integer>>> getPli() {
+    public List<List<List<Integer>>> genPliMapAndInversePli(List<List<String>> data) {
+        nAttributes = data.isEmpty() ? 0 : data.get(0).size();
+
+        for (int e = 0; e < nAttributes; e++) {
+            pli.add(new ArrayList<>());
+            pliMap.add(new HashMap<>());
+        }
+
+        insertData(data);
+
         return pli;
-    }
-
-    public List<List<Integer>> getInversePli() {
-        return inversePli;
-    }
-
-    public int getTupleCount() {
-        return nTuples;
     }
 
     public void insertData(List<List<String>> insertedData) {
@@ -80,11 +82,11 @@ public class PliClass {
             inversePli.add(new ArrayList<>());
 
         for (int e = 0; e < nAttributes; e++) {
+            Map<String, Integer> pliMapE = pliMap.get(e);
             for (int t = 0; t < insertedData.size(); t++) {
-                Map<String, Integer> pliMapE = pliMap.get(e);
                 Integer clstId = pliMapE.get(insertedData.get(t).get(e));
                 if (clstId == null) {       // new cluster
-                    clstId = pliMap.get(e).size();
+                    clstId = pliMapE.size();
                     pliMapE.put(insertedData.get(t).get(e), clstId);
                 }
                 inversePli.get(t + nTuples).add(clstId);
@@ -124,4 +126,17 @@ public class PliClass {
 
         nTuples -= removedTuples.size();
     }
+
+    public List<List<List<Integer>>> getPli() {
+        return pli;
+    }
+
+    public List<List<Integer>> getInversePli() {
+        return inversePli;
+    }
+
+    public int getTupleCount() {
+        return nTuples;
+    }
+
 }

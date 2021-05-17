@@ -247,7 +247,9 @@ public class Bhmmcs {
 
         int removeCand = 0;
         for (int i = 0; i < minRmvdSubsets.size(); i++)
-            if (hasExposed[i]) removeCand |= minRmvdSubsets.get(i);
+            // TODO: may miss some covers
+            //if (hasExposed[i])
+                removeCand |= minRmvdSubsets.get(i);
         List<Integer> removeEles = IntSet.indicesOfOnes(removeCand);
 
         Set<Integer> existNodes = new HashSet<>();
@@ -292,6 +294,49 @@ public class Bhmmcs {
             }
         }
         return new ArrayList<>(minExposedSets);
+    }
+
+    List<Integer> genMinExposedSubsets1(List<Integer> minRemovedSets, List<Integer> leftSubsets, boolean[] hasExposed) {
+        Map<Integer, List<Integer>> minExposed = new HashMap<>();
+        int[] leftCar = leftSubsets.stream().mapToInt(Integer::bitCount).toArray();
+
+        for (int i = 0; i < minRemovedSets.size(); i++) {
+            int minRemovedSet = minRemovedSets.get(i);
+            for (int j = leftSubsets.size() - 1; j >= 0; j--) {
+                if (Integer.bitCount(minRemovedSet) >= leftCar[j]) break;
+                if (IntSet.isSubset(minRemovedSet, leftSubsets.get(j))) {
+                    boolean min = true;
+                    for (int k = 0, size = minSubsets.size(); k < size && minSubsets.get(k) < leftCar[j]; k++) {
+                        if (IntSet.isSubset(minSubsets.get(k), leftSubsets.get(j))) {
+                            min = false;
+                            break;
+                        }
+                    }
+                    if (min) {
+                        List<Integer> covers = minExposed.getOrDefault(leftSubsets.get(j), new ArrayList<>());
+                        covers.add(i);
+                        if (covers.size() == 1) minExposed.put(leftSubsets.get(j), covers);
+                    }
+                }
+            }
+        }
+
+        List<Integer> minExposedSets = new ArrayList<>(minExposed.keySet());
+        IntSet.sortIntSets(nElements, minExposedSets);
+        boolean[] notMin = new boolean[minExposedSets.size()];
+        int[] cars = minExposedSets.stream().mapToInt(Integer::bitCount).toArray();
+
+        for (int i = 0; i < minExposedSets.size(); i++) {
+            if (notMin[i]) minExposed.remove(minExposedSets.get(i));
+            else {
+                for (int cover : minExposed.get(minExposedSets.get(i)))
+                    hasExposed[cover] = true;
+                for (int j = minExposedSets.size() - 1; cars[j] > cars[i]; j--)
+                    if (IntSet.isSubset(minExposedSets.get(i), minExposedSets.get(j))) notMin[j] = true;
+            }
+        }
+
+        return new ArrayList<>(minExposed.keySet());
     }
 
     void removeEmptySubset(List<Integer> subsets, boolean remove) {

@@ -25,6 +25,11 @@
             <version>1.0.0</version>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>me.tongfei</groupId>
+            <artifactId>progressbar</artifactId>
+            <version>0.9.1</version>
+        </dependency>
     </dependencies>
 
     <properties>

@@ -20,7 +20,7 @@ public class Utils {
         };
     }
 
-    public static Comparator<Map.Entry<BitSet, Integer>> BitsetMapComparator() {
+    public static Comparator<Map.Entry<BitSet, Long>> BitsetMapComparator() {
         return (a, b) -> {
             if (a.equals(b)) return 0;
 

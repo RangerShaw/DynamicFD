@@ -17,23 +17,24 @@ public class DiffConnector {
     void initiateDataStructure(List<List<String>> data) {
         nElements = data.isEmpty() ? 0 : data.get(0).size();
         pliClass = new PliClass();
-        differenceSet = nElements <= 32 ? new DifferenceSet() : new DifferenceSet64();
+        differenceSet = new DifferenceSet();
+        //differenceSet = nElements <= 32 ? new DifferenceSet() : new DifferenceSet64();
     }
 
     public List<? extends Number> generatePliAndDiff(List<List<String>> data) {
         initiateDataStructure(data);
 
         pliClass.generatePLI(data);
-        differenceSet.generateDiffSet(pliClass.getInversePli());
+        differenceSet.generateDiffSet(pliClass.getPli(), pliClass.getInversePli());
 
         return differenceSet.getDiffSet();
     }
 
-    public Map<BitSet, Integer> generatePliAndDiffMap(List<List<String>> data) {
+    public Map<BitSet, Long> generatePliAndDiffMap(List<List<String>> data) {
         initiateDataStructure(data);
 
-        pliClass.generatePLI(data);
-        return differenceSet.generateDiffSet(pliClass.getInversePli());
+        pliClass.genPliMapAndInversePli(data);
+        return differenceSet.generateDiffSet(pliClass.getPli(), pliClass.getInversePli());
     }
 
     /**
@@ -55,6 +56,9 @@ public class DiffConnector {
         return differenceSet.getDiffSet();
     }
 
+    public Map<Integer, Long> getDiffFreq() {
+        return differenceSet.getDiffFreq();
+    }
 
     /**
      * @return new Diffs
