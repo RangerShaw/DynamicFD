@@ -1,6 +1,6 @@
 package algorithm.hittingSet.BHMMCS;
 
-import algorithm.hittingSet.IntSet;
+import algorithm.hittingSet.NumSet;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -61,7 +61,7 @@ public class Bhmmcs64 {
         for (int i = 0; i < nElements; i++)
             minSubsetParts.add(new ArrayList<>());
         for (long sb : minSubsets)
-            for (int e : IntSet.indicesOfOnes(sb))
+            for (int e : NumSet.indicesOfOnes(sb))
                 minSubsetParts.get(e).add(sb);
     }
 
@@ -76,7 +76,7 @@ public class Bhmmcs64 {
             res.add(subsets.get(i));
             for (int j = subsets.size() - 1; j > i; j--) {
                 if (cardinalities[i] >= cardinalities[j]) break;
-                if (!notMin[j] && IntSet.isSubset(subsets.get(i), subsets.get(j))) notMin[j] = true;
+                if (!notMin[j] && NumSet.isSubset(subsets.get(i), subsets.get(j))) notMin[j] = true;
             }
         }
 
@@ -103,7 +103,7 @@ public class Bhmmcs64 {
                 }
                 allMinSubsets.add(minSubsets.get(i));
                 for (int k = newSubsets.size() - 1; k >= 0 && car < cardinalities[k]; k--)
-                    if (!notMinNew[k] && IntSet.isSubset(minSubsets.get(i), newSubsets.get(k))) notMinNew[k] = true;
+                    if (!notMinNew[k] && NumSet.isSubset(minSubsets.get(i), newSubsets.get(k))) notMinNew[k] = true;
             }
 
             for (; j < newSubsets.size() && cardinalities[j] == car; j++) {                      // use new min to filter old and new min
@@ -112,9 +112,9 @@ public class Bhmmcs64 {
                 allMinSubsets.add(sbj);
                 newMinSubsets.add(sbj);
                 for (int k = minSubsets.size() - 1; k >= 0 && car < Long.bitCount(minSubsets.get(k)); k--)
-                    if (!notMinOld[k] && IntSet.isSubset(sbj, minSubsets.get(k))) notMinOld[k] = true;
+                    if (!notMinOld[k] && NumSet.isSubset(sbj, minSubsets.get(k))) notMinOld[k] = true;
                 for (int k = newSubsets.size() - 1; k >= 0 && car < cardinalities[k]; k--)
-                    if (!notMinNew[k] && IntSet.isSubset(sbj, newSubsets.get(k))) notMinNew[k] = true;
+                    if (!notMinNew[k] && NumSet.isSubset(sbj, newSubsets.get(k))) notMinNew[k] = true;
             }
         }
 
@@ -134,7 +134,7 @@ public class Bhmmcs64 {
         List<Long> newMinSubsets = genNewMinSubsets(insertedSubsets, rmvMinSubsets);
 
         for (long sb : newMinSubsets)
-            for (int e : IntSet.indicesOfOnes(sb))
+            for (int e : NumSet.indicesOfOnes(sb))
                 minSubsetParts.get(e).add(sb);
 
         for (BhmmcsNode64 prevNode : coverNodes)
@@ -163,7 +163,7 @@ public class Bhmmcs64 {
         long addCandidates = nd.getAddCandidates();
         childCand &= ~(addCandidates);
 
-        for (int e : IntSet.indicesOfOnes(addCandidates)) {
+        for (int e : NumSet.indicesOfOnes(addCandidates)) {
             BhmmcsNode64 childNode = nd.getChildNode(e, childCand);
             if (childNode.isGlobalMinimal()) {
                 walkDown(childNode, newNodes);
@@ -206,12 +206,12 @@ public class Bhmmcs64 {
         for (List<Long> exposed : minExposedSets) {
             for (long sb : exposed) {
                 minSubsets.add(sb);
-                for (int e : IntSet.indicesOfOnes(sb))
+                for (int e : NumSet.indicesOfOnes(sb))
                     minSubsetParts.get(e).add(sb);
             }
         }
         minSubsets = minSubsets.stream().distinct().collect(Collectors.toList());
-        IntSet.sortLongSets(nElements, minSubsets);
+        NumSet.sortLongSets(nElements, minSubsets);
 
         // 3 remove subsets from nodes' crit and walk up if some crit is empty
         for (BhmmcsNode64 nd : coverNodes) {
@@ -240,7 +240,7 @@ public class Bhmmcs64 {
                 long and = minRmvdSubsets.get(i) & nd.elements;
                 if (!minExposedSets.get(i).isEmpty()) {
                     potential = true;
-                    for (int e : IntSet.indicesOfOnes(and))
+                    for (int e : NumSet.indicesOfOnes(and))
                         nd.removeEle(e, minSubsetParts.get(e));
                 }
             }
@@ -258,10 +258,10 @@ public class Bhmmcs64 {
             List<Long> exposed = new ArrayList<>();
             for (int j = leftSubsets.size() - 1; j >= 0; j--) {
                 if (Long.bitCount(minRemovedSet) >= leftCar[j]) break;
-                if (IntSet.isSubset(minRemovedSet, leftSubsets.get(j))) {
+                if (NumSet.isSubset(minRemovedSet, leftSubsets.get(j))) {
                     boolean min = true;
                     for (int k = 0; leftCar[k] < leftCar[j]; k++) {
-                        if (IntSet.isSubset(leftSubsets.get(k), leftSubsets.get(j))) {
+                        if (NumSet.isSubset(leftSubsets.get(k), leftSubsets.get(j))) {
                             min = false;
                             break;
                         }

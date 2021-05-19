@@ -1,7 +1,7 @@
 package algorithm.hittingSet.fdConnector;
 
 import algorithm.hittingSet.BHMMCS.Bhmmcs64;
-import algorithm.hittingSet.IntSet;
+import algorithm.hittingSet.NumSet;
 import util.Utils;
 
 import java.util.*;
@@ -36,7 +36,7 @@ public class BhmmcsFdConnector64 implements FdConnector {
 
         this.nElements = nElements;
 
-        IntSet.sortLongSets(nElements, toCover);
+        NumSet.sortLongSets(nElements, toCover);
         List<List<Long>> subsetParts = genSubsetParts(toCover);
 
         for (int rhs = 0; rhs < nElements; rhs++) {
@@ -50,7 +50,7 @@ public class BhmmcsFdConnector64 implements FdConnector {
     public List<List<BitSet>> insertSubsets(List<? extends Number> _addedSets) {
         List<Long> addedSets = (List<Long>) _addedSets;
 
-        IntSet.sortLongSets(nElements, addedSets);
+        NumSet.sortLongSets(nElements, addedSets);
         List<List<Long>> subsetParts = genSubsetParts(addedSets);
 
         for (int rhs = 0; rhs < nElements; rhs++) {
@@ -69,7 +69,7 @@ public class BhmmcsFdConnector64 implements FdConnector {
         List<List<Long>> leftSubsetParts = genSubsetParts(leftDiffs);
 
         List<Long> rmvdDiffs = new ArrayList<>(removed);
-        IntSet.sortLongSets(nElements, rmvdDiffs);
+        NumSet.sortLongSets(nElements, rmvdDiffs);
 
         List<List<Long>> rmvdSubsetParts = genSubsetParts(rmvdDiffs);
 
@@ -90,7 +90,7 @@ public class BhmmcsFdConnector64 implements FdConnector {
             subsetParts.add(new ArrayList<>());
 
         for (long set : subsets)
-            for (int e : IntSet.indicesOfOnes(set))
+            for (int e : NumSet.indicesOfOnes(set))
                 subsetParts.get(e).add(set);
 
         return subsetParts;

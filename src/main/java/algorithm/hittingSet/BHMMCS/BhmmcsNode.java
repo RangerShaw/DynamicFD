@@ -1,9 +1,8 @@
 package algorithm.hittingSet.BHMMCS;
 
-import algorithm.hittingSet.IntSet;
+import algorithm.hittingSet.NumSet;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class BhmmcsNode {
 
@@ -71,7 +70,7 @@ public class BhmmcsNode {
     }
 
     public boolean isGlobalMinimal() {
-        return IntSet.indicesOfOnes(elements).stream().noneMatch(e -> crit.get(e).isEmpty());
+        return NumSet.indicesOfOnes(elements).stream().noneMatch(e -> crit.get(e).isEmpty());
     }
 
     /**
@@ -111,7 +110,7 @@ public class BhmmcsNode {
             else uncov.add(sb);
         }
 
-        for (int u : IntSet.indicesOfOnes(elements))
+        for (int u : NumSet.indicesOfOnes(elements))
             crit.get(u).removeIf(F -> (F & (1 << e)) != 0);
 
         elements |= 1 << e;
@@ -133,6 +132,26 @@ public class BhmmcsNode {
         crit.get(e).clear();
 
         for (int sb : intsWithE) {
+            int critCover = getCritCover(sb);
+            if (critCover == -1) uncov.add(sb);
+            else if (critCover >= 0) crit.get(critCover).add(sb);
+        }
+    }
+
+    void removeEle(int newElements, List<Integer> removed, List<List<Integer>> subsetParts) {
+        if (newElements == elements) return;
+
+        elements = newElements;
+
+        cand = (~elements) & Bhmmcs.elementsMask;
+
+        Set<Integer> potentialCrit = new HashSet<>();
+        for (int e : removed) {
+            crit.get(e).clear();
+            potentialCrit.addAll(subsetParts.get(e));
+        }
+
+        for (int sb : potentialCrit) {
             int critCover = getCritCover(sb);
             if (critCover == -1) uncov.add(sb);
             else if (critCover >= 0) crit.get(critCover).add(sb);
@@ -163,7 +182,7 @@ public class BhmmcsNode {
             else if (critCover >= 0) crit.get(critCover).add(newSb);
         }
 
-        for (int e : IntSet.indicesOfOnes(elements))
+        for (int e : NumSet.indicesOfOnes(elements))
             crit.get(e).removeAll(rmvMinSubsets);
     }
 
@@ -172,7 +191,7 @@ public class BhmmcsNode {
 
         List<Integer> redundantEles = new ArrayList<>();
 
-        for (int e : IntSet.indicesOfOnes(elements)) {
+        for (int e : NumSet.indicesOfOnes(elements)) {
             crit.get(e).removeIf(removedSets::contains);
             if (crit.get(e).isEmpty()) redundantEles.add(e);
         }

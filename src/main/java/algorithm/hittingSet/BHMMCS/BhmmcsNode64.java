@@ -1,6 +1,6 @@
 package algorithm.hittingSet.BHMMCS;
 
-import algorithm.hittingSet.IntSet;
+import algorithm.hittingSet.NumSet;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -74,7 +74,7 @@ public class BhmmcsNode64 {
     }
 
     public boolean isGlobalMinimal() {
-        return IntSet.indicesOfOnes(elements).stream().noneMatch(e -> crit.get(e).isEmpty());
+        return NumSet.indicesOfOnes(elements).stream().noneMatch(e -> crit.get(e).isEmpty());
     }
 
     /**
@@ -114,7 +114,7 @@ public class BhmmcsNode64 {
             else uncov.add(sb);
         }
 
-        for (int u : IntSet.indicesOfOnes(elements))
+        for (int u : NumSet.indicesOfOnes(elements))
             crit.get(u).removeIf(F -> (F & (1L << e)) != 0);
 
         elements |= 1L << e;
@@ -169,7 +169,7 @@ public class BhmmcsNode64 {
             else if (critCover >= 0) crit.get(critCover).add(newSb);
         }
 
-        for (int e : IntSet.indicesOfOnes(elements))
+        for (int e : NumSet.indicesOfOnes(elements))
             crit.get(e).removeAll(rmvMinSubsets);
     }
 
@@ -178,7 +178,7 @@ public class BhmmcsNode64 {
 
         redundantEles = new ArrayList<>();
 
-        for (int e : IntSet.indicesOfOnes(elements)) {
+        for (int e : NumSet.indicesOfOnes(elements)) {
             crit.get(e).removeIf(removedSets::contains);
             if (crit.get(e).isEmpty()) redundantEles.add(e);
         }

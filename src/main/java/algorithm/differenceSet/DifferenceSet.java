@@ -1,11 +1,10 @@
 package algorithm.differenceSet;
 
-import com.koloboke.collect.map.hash.HashIntIntMap;
 import com.koloboke.collect.map.hash.HashIntLongMap;
 import com.koloboke.collect.map.hash.HashIntLongMaps;
 import me.tongfei.progressbar.ProgressBar;
 import util.DataIO;
-import algorithm.hittingSet.IntSet;
+import algorithm.hittingSet.NumSet;
 import util.Utils;
 
 import java.util.*;
@@ -60,7 +59,7 @@ public class DifferenceSet implements DifferenceSetInterface {
         Map<BitSet, Long> diffSetMap = DataIO.readDiffSetsMap(diffFp);
 
         diffSet.addAll(diffSetMap.keySet().stream().map(bs -> Utils.bitsetToInt(nAttributes, bs)).collect(Collectors.toList()));
-        IntSet.sortIntSets(nAttributes, diffSet);
+        NumSet.sortIntSets(nAttributes, diffSet);
 
         for (Map.Entry<BitSet, Long> df : diffSetMap.entrySet())
             diffFreq.put(Utils.bitsetToInt(nAttributes, df.getKey()), (long) df.getValue());
@@ -106,7 +105,7 @@ public class DifferenceSet implements DifferenceSetInterface {
         }
 
         diffSet.addAll(newDiffs);
-        IntSet.sortIntSets(nAttributes, diffSet);
+        NumSet.sortIntSets(nAttributes, diffSet);
 
         nTuples = inversePli.size();
 
@@ -149,7 +148,7 @@ public class DifferenceSet implements DifferenceSetInterface {
         });
 
         diffSet.addAll(newDiffs);
-        IntSet.sortIntSets(nAttributes, diffSet);
+        NumSet.sortIntSets(nAttributes, diffSet);
 
         nTuples = inversePli.size();
 
