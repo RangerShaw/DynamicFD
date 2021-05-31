@@ -56,6 +56,7 @@ public class BhmmcsFdConnector implements FdConnector {
             bhmmcsList.get(rhs).insertSubsets(subsetParts.get(rhs));
             minFDs.set(rhs, bhmmcsList.get(rhs).getMinCoverSets().stream().map(sb -> Utils.intToBitSet(nElements, sb)).collect(Collectors.toList()));
         }
+
         return new ArrayList<>(minFDs);
     }
 

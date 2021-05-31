@@ -175,15 +175,19 @@ public class BhmmcsNode {
         }
     }
 
-    void insertSubsets(List<Integer> newSubsets, Set<Integer> rmvMinSubsets) {
+    boolean insertSubsets(List<Integer> newSubsets, Set<Integer> rmvMinSubsets) {
+        List<Integer> eles = NumSet.indicesOfOnes(elements);
+
+        for (int e : eles)
+            crit.get(e).removeAll(rmvMinSubsets);
+
         for (int newSb : newSubsets) {
             int critCover = getCritCover(newSb);
             if (critCover == -1) uncov.add(newSb);
             else if (critCover >= 0) crit.get(critCover).add(newSb);
         }
 
-        for (int e : NumSet.indicesOfOnes(elements))
-            crit.get(e).removeAll(rmvMinSubsets);
+        return eles.stream().noneMatch(e -> crit.get(e).isEmpty());
     }
 
     List<Integer> removeSubsets(Set<Integer> removedSets) {

@@ -37,12 +37,13 @@ public class Bhmmcs {
     }
 
     public void initiate(List<Integer> subsets) {
-        initStructures();
-
         if (NumSet.removeEmptySubset(subsets)) hasEmptySubset = true;
 
         minSubsets = NumSet.findMinIntSets(subsets);
 
+        minSubsetParts = new ArrayList<>();
+        for (int i = 0; i < nElements; i++)
+            minSubsetParts.add(new ArrayList<>());
         for (int sb : minSubsets)
             for (int e : NumSet.indicesOfOnes(sb))
                 minSubsetParts.get(e).add(sb);
@@ -50,14 +51,6 @@ public class Bhmmcs {
         coverNodes = walkDown(new BhmmcsNode(nElements, minSubsets));
     }
 
-    void initStructures() {
-        coverNodes = new ArrayList<>();
-        hasEmptySubset = false;
-        minSubsets = new ArrayList<>();
-        minSubsetParts = new ArrayList<>();
-        for (int i = 0; i < nElements; i++)
-            minSubsetParts.add(new ArrayList<>());
-    }
 
     List<BhmmcsNode> walkDown(BhmmcsNode root) {
         Set<Integer> walked = new HashSet<>();
@@ -103,10 +96,13 @@ public class Bhmmcs {
             for (int e : NumSet.indicesOfOnes(sb))
                 minSubsetParts.get(e).add(sb);
 
-        for (BhmmcsNode prevNode : coverNodes)
-            prevNode.insertSubsets(newMinSubsets, rmvMinSubsets);
+        List<BhmmcsNode> coverNodes1 = new ArrayList<>();
+        for (BhmmcsNode prevNode : coverNodes) {
+            if (prevNode.insertSubsets(newMinSubsets, rmvMinSubsets))
+                coverNodes1.add(prevNode);
+        }
 
-        coverNodes = walkDown(coverNodes);
+        coverNodes = walkDown(coverNodes1);
     }
 
     List<BhmmcsNode> walkDown(List<BhmmcsNode> oldCoverNodes) {
@@ -144,12 +140,9 @@ public class Bhmmcs {
 
         // 3 remove subsets from nodes' crit and walk up if some crit is empty
         coverNodes = removeSubsetsFromNodes(minRemoved);
-        //System.out.println("time 3: " + ((System.nanoTime() - startTime) / 1000000) + "ms");
 
         // 4 find all coverNode that intersect with minRemoved and re-walk
-        //startTime = System.nanoTime();
         coverNodes = rewalk(minRmvdSubsets);
-        // System.out.println("time 4: " + ((System.nanoTime() - startTime) / 1000000) + "ms");
     }
 
     List<BhmmcsNode> removeSubsetsFromNodes(Set<Integer> minRemoved) {

@@ -148,7 +148,7 @@ public class NumSet {
 
     /**
      * @param oldMinSets input of SORTED old min sets
-     * @param newSets    input of new sets that are different from oldMinSets
+     * @param newSets    input of SORTED new sets that are different from oldMinSets
      * @param newMinSets output of new min sets that didn't appear in oldMinSets
      * @param removed    output of removed old min sets
      * @return output of all sorted current min subsets
