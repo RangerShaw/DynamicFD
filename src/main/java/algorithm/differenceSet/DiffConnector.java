@@ -17,7 +17,7 @@ public class DiffConnector {
     void initiateDataStructure(List<List<String>> data) {
         nElements = data.isEmpty() ? 0 : data.get(0).size();
         pliClass = new PliClass();
-        differenceSet = new DifferenceSet();
+        differenceSet = new DifferenceSet64();
         //differenceSet = nElements <= 32 ? new DifferenceSet() : new DifferenceSet64();
     }
 

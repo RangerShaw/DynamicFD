@@ -127,7 +127,14 @@ public class NumSet {
         return minSets;
     }
 
-    public static boolean removeEmptySubset(List<Integer> sets) {
+    public static boolean removeEmptyIntSet(List<Integer> sets) {
+        // sets should be sorted already
+        if (sets.isEmpty() || sets.get(0) != 0) return false;
+        sets.remove(0);
+        return true;
+    }
+
+    public static boolean removeEmptyLongSet(List<Long> sets) {
         // sets should be sorted already
         if (sets.isEmpty() || sets.get(0) != 0) return false;
         sets.remove(0);
@@ -191,7 +198,45 @@ public class NumSet {
         return allMinSets;
     }
 
-    public static List<Integer> findRemovedMinSubsets(List<Integer> removedSets, List<Integer> oldMinSets) {
+    public static List<Long> findMinLongSets(int nElements, List<Long> oldMinSets,
+                                               List<Long> newSets, List<Long> newMinSets, Set<Long> removed) {
+        List<Long> allMinSets = new ArrayList<>();    // min sets of all current sets
+
+        boolean[] notMinNew = new boolean[newSets.size()];
+        boolean[] notMinOld = new boolean[oldMinSets.size()];
+        int[] newCars = newSets.stream().mapToInt(Long::bitCount).toArray();
+        int[] oldCars = oldMinSets.stream().mapToInt(Long::bitCount).toArray();
+
+        for (int i = 0, j = 0, car = 1; car <= nElements; car++) {          // for each layer of cardinality
+            if (i == oldMinSets.size() && j == newSets.size()) break;
+
+            for (; i < oldMinSets.size() && oldCars[i] == car; i++) {   // use old min to filter new min
+                long sbi = oldMinSets.get(i);
+                if (notMinOld[i])
+                    removed.add(sbi);
+                else {
+                    allMinSets.add(sbi);
+                    for (int k = newSets.size() - 1; k >= 0 && car < newCars[k]; k--)
+                        if (!notMinNew[k] && isSubset(sbi, newSets.get(k))) notMinNew[k] = true;
+                }
+            }
+
+            for (; j < newSets.size() && newCars[j] == car; j++) {          // use new min to filter old and new min
+                if (notMinNew[j]) continue;
+                long sbj = newSets.get(j);
+                allMinSets.add(sbj);
+                newMinSets.add(sbj);
+                for (int k = oldMinSets.size() - 1; k >= 0 && car < oldCars[k]; k--)
+                    if (!notMinOld[k] && isSubset(sbj, oldMinSets.get(k))) notMinOld[k] = true;
+                for (int k = newSets.size() - 1; k >= 0 && car < newCars[k]; k--)
+                    if (!notMinNew[k] && isSubset(sbj, newSets.get(k))) notMinNew[k] = true;
+            }
+        }
+
+        return allMinSets;
+    }
+
+    public static List<Integer> findRemovedMinIntSets(List<Integer> removedSets, List<Integer> oldMinSets) {
         Set<Integer> minRemoved = new HashSet<>(removedSets);
         List<Integer> minRmvdSubsets = new ArrayList<>();
 
@@ -201,12 +246,39 @@ public class NumSet {
         return minRmvdSubsets;
     }
 
-    public static List<Integer> findMinExposedSets(List<Integer> minRemovedSets, List<Integer> leftSubsets) {
+    public static List<Long> findRemovedMinLongSets(List<Long> removedSets, List<Long> oldMinSets) {
+        Set<Long> minRemoved = new HashSet<>(removedSets);
+        List<Long> minRmvdSubsets = new ArrayList<>();
+
+        for (long minSubset : oldMinSets)
+            if (minRemoved.contains(minSubset)) minRmvdSubsets.add(minSubset);
+
+        return minRmvdSubsets;
+    }
+
+    public static List<Integer> findMinExposedIntSets(List<Integer> minRemovedSets, List<Integer> leftSubsets) {
         Set<Integer> minExposedSets = new HashSet<>();
         int[] leftCar = leftSubsets.stream().mapToInt(Integer::bitCount).toArray();
 
         for (int minRemovedSet : minRemovedSets) {
             int car = Integer.bitCount(minRemovedSet);
+            for (int j = leftSubsets.size() - 1; j >= 0 && leftCar[j] > car; j--) {
+                if (NumSet.isSubset(minRemovedSet, leftSubsets.get(j)) && !minExposedSets.contains(leftSubsets.get(j))) {
+                    int k = 0;
+                    for (; leftCar[k] < leftCar[j] && !NumSet.isSubset(leftSubsets.get(k), leftSubsets.get(j)); k++) ;
+                    if (leftCar[k] >= leftCar[j]) minExposedSets.add(leftSubsets.get(j));
+                }
+            }
+        }
+        return new ArrayList<>(minExposedSets);
+    }
+
+    public static List<Long> findMinExposedLongSets(List<Long> minRemovedSets, List<Long> leftSubsets) {
+        Set<Long> minExposedSets = new HashSet<>();
+        int[] leftCar = leftSubsets.stream().mapToInt(Long::bitCount).toArray();
+
+        for (long minRemovedSet : minRemovedSets) {
+            int car = Long.bitCount(minRemovedSet);
             for (int j = leftSubsets.size() - 1; j >= 0 && leftCar[j] > car; j--) {
                 if (NumSet.isSubset(minRemovedSet, leftSubsets.get(j)) && !minExposedSets.contains(leftSubsets.get(j))) {
                     int k = 0;

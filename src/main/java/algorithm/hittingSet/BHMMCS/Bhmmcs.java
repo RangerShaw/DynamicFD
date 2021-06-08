@@ -37,7 +37,7 @@ public class Bhmmcs {
     }
 
     public void initiate(List<Integer> subsets) {
-        if (NumSet.removeEmptySubset(subsets)) hasEmptySubset = true;
+        if (NumSet.removeEmptyIntSet(subsets)) hasEmptySubset = true;
 
         minSubsets = NumSet.findMinIntSets(subsets);
 
@@ -86,7 +86,7 @@ public class Bhmmcs {
 
 
     public void insertSubsets(List<Integer> insertedSubsets) {
-        if (NumSet.removeEmptySubset(insertedSubsets)) hasEmptySubset = true;
+        if (NumSet.removeEmptyIntSet(insertedSubsets)) hasEmptySubset = true;
 
         List<Integer> newMinSubsets = new ArrayList<>();
         Set<Integer> rmvMinSubsets = new HashSet<>();
@@ -117,11 +117,11 @@ public class Bhmmcs {
 
 
     public void removeSubsets(List<Integer> leftSubsets, List<Integer> rmvdSubsets) {
-        if (NumSet.removeEmptySubset(leftSubsets)) hasEmptySubset = true;
-        NumSet.removeEmptySubset(rmvdSubsets);
+        if (NumSet.removeEmptyIntSet(leftSubsets)) hasEmptySubset = true;
+        NumSet.removeEmptyIntSet(rmvdSubsets);
 
         // 1 find all min removed subsets from minSubsets and update
-        List<Integer> minRmvdSubsets = NumSet.findRemovedMinSubsets(rmvdSubsets, minSubsets);
+        List<Integer> minRmvdSubsets = NumSet.findRemovedMinIntSets(rmvdSubsets, minSubsets);
         Set<Integer> minRemoved = new HashSet<>(minRmvdSubsets);
 
         minSubsets.removeAll(minRemoved);
@@ -129,7 +129,7 @@ public class Bhmmcs {
             minSubsetPart.removeAll(minRemoved);
 
         // 2 find all min exposed subsets in leftSubsets and update
-        List<Integer> minExposedSets = NumSet.findMinExposedSets(minRmvdSubsets, leftSubsets);
+        List<Integer> minExposedSets = NumSet.findMinExposedIntSets(minRmvdSubsets, leftSubsets);
 
         for (int sb : minExposedSets)
             for (int e : NumSet.indicesOfOnes(sb))
@@ -146,7 +146,7 @@ public class Bhmmcs {
     }
 
     List<BhmmcsNode> removeSubsetsFromNodes(Set<Integer> minRemoved) {
-        List<BhmmcsNode> newCoverNodes = new ArrayList<>();
+        List<BhmmcsNode> newCoverNodes = new ArrayList<>(coverNodes.size());
         Set<Integer> walked = new HashSet<>();
 
         for (BhmmcsNode nd : coverNodes) {

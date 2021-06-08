@@ -142,7 +142,8 @@ public class TestCase {
 
     static FdConnector initiateFd(int nElements, List<? extends Number> initDiffSets) {
         // initiate FD
-        FdConnector fdConnector = nElements <= 32 ? new BhmmcsFdConnector() : new BhmmcsFdConnector64();
+        FdConnector fdConnector = new BhmmcsFdConnector64();
+        //FdConnector fdConnector = nElements <= 32 ? new BhmmcsFdConnector() : new BhmmcsFdConnector64();
         fdConnector.initiate(nElements, initDiffSets);
         System.out.println("  # of initial FD: " + fdConnector.getMinFDs().stream().map(List::size).reduce(0, Integer::sum));
 

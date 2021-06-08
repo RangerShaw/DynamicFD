@@ -16,12 +16,12 @@ public class BhmmcsNode {
     int cand;
 
     /**
-     * uncovered ints
+     * uncovered sets
      */
     private List<Integer> uncov;
 
     /**
-     * crit[i]: ints for which element i is crucial
+     * crit[i]: sets for which element i is crucial
      */
     ArrayList<ArrayList<Integer>> crit;
 
@@ -33,10 +33,10 @@ public class BhmmcsNode {
     /**
      * for initiation only
      */
-    BhmmcsNode(int nEle, List<Integer> intsToCover) {
+    BhmmcsNode(int nEle, List<Integer> setsToCover) {
         nElements = nEle;
         elements = 0;
-        uncov = new ArrayList<>(intsToCover);
+        uncov = new ArrayList<>(setsToCover);
 
         cand = 0;
         for (int i = 0; i < nElements; i++)
@@ -116,13 +116,13 @@ public class BhmmcsNode {
         elements |= 1 << e;
     }
 
-    BhmmcsNode getParentNode(int e, List<Integer> intsWithE) {
+    BhmmcsNode getParentNode(int e, List<Integer> setsWithE) {
         BhmmcsNode parentNode = new BhmmcsNode(nElements);
-        parentNode.updateContextFromChild(e, this, intsWithE);
+        parentNode.updateContextFromChild(e, this, setsWithE);
         return parentNode;
     }
 
-    void removeEle(int e, List<Integer> intsWithE) {
+    void removeEle(int e, List<Integer> setsWithE) {
         if ((elements & (1 << e)) == 0) return;
 
         elements &= ~(1 << e);
@@ -131,7 +131,7 @@ public class BhmmcsNode {
 
         crit.get(e).clear();
 
-        for (int sb : intsWithE) {
+        for (int sb : setsWithE) {
             int critCover = getCritCover(sb);
             if (critCover == -1) uncov.add(sb);
             else if (critCover >= 0) crit.get(critCover).add(sb);
@@ -158,7 +158,7 @@ public class BhmmcsNode {
         }
     }
 
-    void updateContextFromChild(int e, BhmmcsNode originalNode, List<Integer> intsWithE) {
+    void updateContextFromChild(int e, BhmmcsNode originalNode, List<Integer> setsWithE) {
         elements = originalNode.elements;
         elements &= ~(1 << e);
 
@@ -169,7 +169,7 @@ public class BhmmcsNode {
         crit = new ArrayList<>(nElements);
         for (int i = 0; i < nElements; i++)
             crit.add(new ArrayList<>(originalNode.crit.get(i)));
-        for (int sb : intsWithE) {
+        for (int sb : setsWithE) {
             int critCover = getCritCover(sb);
             if (critCover >= 0) crit.get(critCover).add(sb);
         }

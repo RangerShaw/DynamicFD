@@ -32,17 +32,16 @@ public class BhmmcsFdConnector64 implements FdConnector {
      * @param _toCover all subsets (different sets) to be covered
      */
     public void initiate(int nElements, List<? extends Number> _toCover) {
-        List<Long> toCover = (List<Long>) _toCover;
-
         this.nElements = nElements;
 
+        List<Long> toCover = (List<Long>) _toCover;
         NumSet.sortLongSets(nElements, toCover);
-        List<List<Long>> subsetParts = genSubsetParts(toCover);
+
+        List<List<Long>> subsetParts = genSubsetRhss(toCover);
 
         for (int rhs = 0; rhs < nElements; rhs++) {
-            List<Long> diffSets = genDiffsOnRhs(subsetParts.get(rhs), rhs);
             bhmmcsList.add(new Bhmmcs64(nElements));
-            bhmmcsList.get(rhs).initiate(diffSets);
+            bhmmcsList.get(rhs).initiate(subsetParts.get(rhs));
             minFDs.add(bhmmcsList.get(rhs).getMinCoverSets().stream().map(sb -> Utils.longToBitSet(nElements, sb)).collect(Collectors.toList()));
         }
     }
@@ -51,39 +50,31 @@ public class BhmmcsFdConnector64 implements FdConnector {
         List<Long> addedSets = (List<Long>) _addedSets;
 
         NumSet.sortLongSets(nElements, addedSets);
-        List<List<Long>> subsetParts = genSubsetParts(addedSets);
+        List<List<Long>> subsetParts = genSubsetRhss(addedSets);
 
         for (int rhs = 0; rhs < nElements; rhs++) {
-            List<Long> newDiffSets = genDiffsOnRhs(subsetParts.get(rhs), rhs);
-            bhmmcsList.get(rhs).insertSubsets(newDiffSets);
+            bhmmcsList.get(rhs).insertSubsets(subsetParts.get(rhs));
             minFDs.set(rhs, bhmmcsList.get(rhs).getMinCoverSets().stream().map(sb -> Utils.longToBitSet(nElements, sb)).collect(Collectors.toList()));
         }
         return new ArrayList<>(minFDs);
     }
 
     public List<List<BitSet>> removeSubsets(List<? extends Number> _leftDiffs, Set<? extends Number> _removed) {
-        List<Long> leftDiffs = (List<Long>) _leftDiffs;
-        Set<Long> removed = (Set<Long>) _removed;
+        List<List<Long>> leftSubsetRhss = genSubsetRhss((List<Long>) _leftDiffs);
 
-        // IntSet.sortIntSets(nElements, leftDiffs);    /* leftDiffs are already sorted if we manage diffSets carefully */
-        List<List<Long>> leftSubsetParts = genSubsetParts(leftDiffs);
-
-        List<Long> rmvdDiffs = new ArrayList<>(removed);
+        List<Long> rmvdDiffs = new ArrayList<>((Set<Long>) _removed);
         NumSet.sortLongSets(nElements, rmvdDiffs);
-
-        List<List<Long>> rmvdSubsetParts = genSubsetParts(rmvdDiffs);
+        List<List<Long>> rmvdSubsetRhss = genSubsetRhss(rmvdDiffs);
 
         for (int rhs = 0; rhs < nElements; rhs++) {
-            List<Long> leftDiffSet = genDiffsOnRhs(leftSubsetParts.get(rhs), rhs);
-            List<Long> removedDiffSet = genDiffsOnRhs(rmvdSubsetParts.get(rhs), rhs);
-            bhmmcsList.get(rhs).removeSubsets(leftDiffSet, removedDiffSet);
+            bhmmcsList.get(rhs).removeSubsets(leftSubsetRhss.get(rhs), rmvdSubsetRhss.get(rhs));
             minFDs.set(rhs, bhmmcsList.get(rhs).getMinCoverSets().stream().map(sb -> Utils.longToBitSet(nElements, sb)).collect(Collectors.toList()));
         }
 
         return new ArrayList<>(minFDs);
     }
 
-    List<List<Long>> genSubsetParts(List<Long> subsets) {
+    List<List<Long>> genSubsetRhss(List<Long> subsets) {
         List<List<Long>> subsetParts = new ArrayList<>(nElements);
 
         for (int i = 0; i < nElements; i++)
@@ -91,19 +82,9 @@ public class BhmmcsFdConnector64 implements FdConnector {
 
         for (long set : subsets)
             for (int e : NumSet.indicesOfOnes(set))
-                subsetParts.get(e).add(set);
+                subsetParts.get(e).add(set & ~(1L << e));
 
         return subsetParts;
-    }
-
-    List<Long> genDiffsOnRhs(List<Long> sets, int rhs) {
-        long mask = ~(1L << rhs);
-        List<Long> diffSetsOnRhs = new ArrayList<>(sets.size());
-
-        for (long set : sets)
-            diffSetsOnRhs.add(set & mask);
-
-        return diffSetsOnRhs;
     }
 
     public List<List<BitSet>> getMinFDs() {
