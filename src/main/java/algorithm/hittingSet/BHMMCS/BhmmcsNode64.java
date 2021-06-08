@@ -106,28 +106,6 @@ public class BhmmcsNode64 {
         elements |= 1L << e;
     }
 
-    BhmmcsNode64 getParentNode(int e, List<Long> setsWithE) {
-        BhmmcsNode64 parentNode = new BhmmcsNode64(nElements);
-        parentNode.updateContextFromChild(e, this, setsWithE);
-        return parentNode;
-    }
-
-    void removeEle(int e, List<Long> setsWithE) {
-        if ((elements & (1L << e)) == 0) return;
-
-        elements &= ~(1L << e);
-
-        cand = (~elements) & Bhmmcs64.elementsMask;
-
-        crit.get(e).clear();
-
-        for (long sb : setsWithE) {
-            int critCover = getCritCover(sb);
-            if (critCover == -1) uncov.add(sb);
-            else if (critCover >= 0) crit.get(critCover).add(sb);
-        }
-    }
-
     void removeEle(long newElements, List<Integer> removed, List<List<Long>> subsetParts) {
         if (newElements == elements) return;
 
@@ -145,23 +123,6 @@ public class BhmmcsNode64 {
             int critCover = getCritCover(sb);
             if (critCover == -1) uncov.add(sb);
             else if (critCover >= 0) crit.get(critCover).add(sb);
-        }
-    }
-
-    void updateContextFromChild(int e, BhmmcsNode64 originalNode, List<Long> setsWithE) {
-        elements = originalNode.elements;
-        elements &= ~(1L << e);
-
-        cand = (~elements) & Bhmmcs64.elementsMask;
-
-        uncov = new ArrayList<>();
-
-        crit = new ArrayList<>(nElements);
-        for (int i = 0; i < nElements; i++)
-            crit.add(new ArrayList<>(originalNode.crit.get(i)));
-        for (long sb : setsWithE) {
-            int critCover = getCritCover(sb);
-            if (critCover >= 0) crit.get(critCover).add(sb);
         }
     }
 
