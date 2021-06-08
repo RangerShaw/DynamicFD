@@ -122,7 +122,7 @@ public class BhmmcsNode {
         return parentNode;
     }
 
-    void removeEle(int e, List<Integer> setsWithE) {
+    void removeEles(int e, List<Integer> setsWithE) {
         if ((elements & (1 << e)) == 0) return;
 
         elements &= ~(1 << e);
@@ -138,15 +138,15 @@ public class BhmmcsNode {
         }
     }
 
-    void removeEle(int newElements, List<Integer> removed, List<List<Integer>> subsetParts) {
-        if (newElements == elements) return;
+    void removeEles(int newElements, List<Integer> removedEles, List<List<Integer>> subsetParts) {
+        //if (newElements == elements) return;
 
         elements = newElements;
 
         cand = (~elements) & Bhmmcs.elementsMask;
 
         Set<Integer> potentialCrit = new HashSet<>();
-        for (int e : removed) {
+        for (int e : removedEles) {
             crit.get(e).clear();
             potentialCrit.addAll(subsetParts.get(e));
         }
@@ -156,6 +156,37 @@ public class BhmmcsNode {
             if (critCover == -1) uncov.add(sb);
             else if (critCover >= 0) crit.get(critCover).add(sb);
         }
+    }
+
+    void removeElesAndSubsets(int newElements, Set<Integer> removedSets, List<Integer> removedEles, List<List<Integer>> subsetParts, List<Integer> minSubsets) {
+        //if (newElements == elements) return;
+
+        elements = newElements;
+
+        cand = (~elements) & Bhmmcs.elementsMask;
+
+        for (int e : NumSet.indicesOfOnes(elements))
+            crit.get(e).removeAll(removedSets);
+
+        Set<Integer> potentialCrit = new HashSet<>();
+        for (int e : removedEles) {
+            crit.get(e).clear();
+            potentialCrit.addAll(subsetParts.get(e));
+        }
+
+        for (int sb : potentialCrit) {
+            int critCover = getCritCover(sb);
+            if (critCover == -1) uncov.add(sb);
+            else if (critCover >= 0) crit.get(critCover).add(sb);
+        }
+
+//        for(var l : crit)
+//            l.clear();
+//        for (int sb : minSubsets) {
+//            int critCover = getCritCover(sb);
+//            if (critCover == -1) uncov.add(sb);
+//            else if (critCover >= 0) crit.get(critCover).add(sb);
+//        }
     }
 
     void updateContextFromChild(int e, BhmmcsNode originalNode, List<Integer> setsWithE) {

@@ -121,10 +121,11 @@ public class Bhmmcs {
         NumSet.removeEmptyIntSet(rmvdSubsets);
 
         // 1 find all min removed subsets from minSubsets and update
-        List<Integer> minRmvdSubsets = NumSet.findRemovedMinIntSets(rmvdSubsets, minSubsets);
+        List<Integer> minRmvdSubsets = new ArrayList<>();
+        minSubsets = NumSet.findRemovedMinIntSets(rmvdSubsets, minSubsets, minRmvdSubsets);
+
         Set<Integer> minRemoved = new HashSet<>(minRmvdSubsets);
 
-        minSubsets.removeAll(minRemoved);
         for (List<Integer> minSubsetPart : minSubsetParts)
             minSubsetPart.removeAll(minRemoved);
 
@@ -138,11 +139,36 @@ public class Bhmmcs {
         minSubsets.addAll(minExposedSets);
         NumSet.sortIntSets(nElements, minSubsets);
 
-        // 3 remove subsets from nodes' crit and walk up if some crit is empty
-        coverNodes = removeSubsetsFromNodes(minRemoved);
+//        // 3 remove subsets from nodes' crit and walk up if some crit is empty
+//        coverNodes = removeSubsetsFromNodes(minRemoved);
+//
+//        // 4 find all coverNode that intersect with minRemoved and re-walk
+//        coverNodes = rewalk(minRmvdSubsets);
 
-        // 4 find all coverNode that intersect with minRemoved and re-walk
-        coverNodes = rewalk(minRmvdSubsets);
+        // remove the union of minRmvdSubsets from nodes' elements and remove minRmvdSubsets from nodes' crit
+        coverNodes = walkUp(minRmvdSubsets, minRemoved, minSubsets);
+
+        coverNodes = walkDown(coverNodes);
+    }
+
+    List<BhmmcsNode> walkUp(List<Integer> minRmvdSubsets, Set<Integer> removedSets, List<Integer> minSubsets) {
+        int removeCand = 0;
+        for (int minRmvdSubset : minRmvdSubsets)
+            removeCand |= minRmvdSubset;
+        List<Integer> removedEles = NumSet.indicesOfOnes(removeCand);
+
+        Set<Integer> walked = new HashSet<>();
+        List<BhmmcsNode> newCoverNodes = new ArrayList<>(coverNodes.size());
+
+        for (BhmmcsNode nd : coverNodes) {
+            int parentElements = nd.elements & ~removeCand;
+            if (walked.add(parentElements)) {
+                nd.removeElesAndSubsets(parentElements, removedSets, removedEles, minSubsetParts, minSubsets);
+                newCoverNodes.add(nd);
+            }
+        }
+
+        return newCoverNodes;
     }
 
     List<BhmmcsNode> removeSubsetsFromNodes(Set<Integer> minRemoved) {
@@ -153,7 +179,7 @@ public class Bhmmcs {
             List<Integer> redundantEles = nd.removeSubsets(minRemoved);
             int parentElements = nd.getParentElements(redundantEles);
             if (walked.add(parentElements)) {
-                nd.removeEle(parentElements, redundantEles, minSubsetParts);
+                nd.removeEles(parentElements, redundantEles, minSubsetParts);
                 newCoverNodes.add(nd);
             }
         }
@@ -166,7 +192,7 @@ public class Bhmmcs {
         List<BhmmcsNode> newCoverNodes = new ArrayList<>();
 
         int removeCand = 0;
-        for (Integer minRmvdSubset : minRmvdSubsets)
+        for (int minRmvdSubset : minRmvdSubsets)
             removeCand |= minRmvdSubset;
         List<Integer> removeEles = NumSet.indicesOfOnes(removeCand);
 
@@ -175,7 +201,7 @@ public class Bhmmcs {
         for (BhmmcsNode nd : coverNodes) {
             int parentElements = nd.getParentElements(removeCand);
             if (walked.add(parentElements)) {
-                nd.removeEle(parentElements, removeEles, minSubsetParts);
+                nd.removeEles(parentElements, removeEles, minSubsetParts);
                 newCoverNodes.add(nd);
             }
         }
@@ -198,7 +224,7 @@ public class Bhmmcs {
         for (BhmmcsNode nd : coverNodes) {
             int parentElements = nd.getParentElements(removeCand);
             if (walked.add(parentElements)) {
-                nd.removeEle(parentElements, removeEles, minSubsetParts);
+                nd.removeEles(parentElements, removeEles, minSubsetParts);
                 newCoverNodes.add(nd);
             }
         }
@@ -212,15 +238,15 @@ public class Bhmmcs {
 
     public List<Integer> getSortedMinCoverSets() {
         return hasEmptySubset ? new ArrayList<>() : coverNodes.stream()
-                .map(BhmmcsNode::getElements)
-                .sorted()
-                .collect(Collectors.toList());
+            .map(BhmmcsNode::getElements)
+            .sorted()
+            .collect(Collectors.toList());
     }
 
     public List<Integer> getMinCoverSets() {
         return hasEmptySubset ? new ArrayList<>() : coverNodes.stream()
-                .map(BhmmcsNode::getElements)
-                .collect(Collectors.toList());
+            .map(BhmmcsNode::getElements)
+            .collect(Collectors.toList());
     }
 
 }

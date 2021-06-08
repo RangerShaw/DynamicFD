@@ -1,5 +1,7 @@
 package algorithm.differenceSet;
 
+import com.koloboke.collect.map.hash.HashIntIntMap;
+import com.koloboke.collect.map.hash.HashIntIntMaps;
 import com.koloboke.collect.map.hash.HashIntLongMap;
 import com.koloboke.collect.map.hash.HashIntLongMaps;
 import me.tongfei.progressbar.ProgressBar;
@@ -24,7 +26,7 @@ public class DifferenceSet implements DifferenceSetInterface {
      */
     HashIntLongMap diffFreq = HashIntLongMaps.newMutableMap();
 
-    int initHash = 0;
+    int fullDiff = 0;
 
 
     public DifferenceSet() {
@@ -35,14 +37,14 @@ public class DifferenceSet implements DifferenceSetInterface {
         nAttributes = inversePli.isEmpty() ? 0 : inversePli.get(0).size();
 
         for (int i = 0; i < nAttributes; i++)
-            initHash |= 1 << i;
+            fullDiff |= 1 << i;
     }
 
     public Map<BitSet, Long> generateDiffSet(List<List<List<Integer>>> pli, List<List<Integer>> inversePli) {
         nAttributes = inversePli.isEmpty() ? 0 : inversePli.get(0).size();
 
         for (int i = 0; i < nAttributes; i++)
-            initHash |= 1 << i;
+            fullDiff |= 1 << i;
 
         initInsertData(pli, inversePli);
 
@@ -70,7 +72,7 @@ public class DifferenceSet implements DifferenceSetInterface {
     /**
      * @return new Diffs
      */
-    public List<Integer> insertData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli) {
+    public List<Integer> insertData1(List<List<List<Integer>>> pli, List<List<Integer>> inversePli) {
         int[] diffHash = new int[inversePli.size()];
 
         List<Integer> newDiffs = new ArrayList<>();
@@ -79,7 +81,7 @@ public class DifferenceSet implements DifferenceSetInterface {
         for (int t = nTuples; t < inversePli.size(); t++) {
             // reset diffHash
             for (int i = 0; i < t; i++)
-                diffHash[i] = initHash;
+                diffHash[i] = fullDiff;
 
             // update pli, generate diffHash
             for (int e = 0; e < nAttributes; e++) {
@@ -112,17 +114,16 @@ public class DifferenceSet implements DifferenceSetInterface {
         return newDiffs;
     }
 
-    public List<Integer> initInsertData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli) {
-        int[] diffHash = new int[inversePli.size()];
+    public List<Integer> insertData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli) {
+        HashIntIntMap diffMap = HashIntIntMaps.newMutableMap();   // neighbor -> diff with it
 
         List<Integer> newDiffs = new ArrayList<>();
+        long nFullDiff = 0;
 
         // for each newly inserted tuple, generate its diffs with all front tuples
-        ProgressBar.wrap(IntStream.range(nTuples, inversePli.size()), "Task").forEach(t -> {
-            //for (int t = nTuples; t < inversePli.size(); t++) {
+        for (int t = nTuples; t < inversePli.size(); t++) {
             // reset diffHash
-            for (int i = 0; i < t; i++)
-                diffHash[i] = initHash;
+            diffMap.clear();
 
             // update pli, generate diffHash
             for (int e = 0; e < nAttributes; e++) {
@@ -132,20 +133,70 @@ public class DifferenceSet implements DifferenceSetInterface {
                 if (clstId >= pliE.size())                      // new cluster
                     pliE.add(new ArrayList<>());
                 else {                                          // existing cluster
-                    int mask = ~(1 << e);
+                    int mask = -(1 << e);
                     for (int neighbor : pliE.get(clstId))
-                        diffHash[neighbor] &= mask;
+                        diffMap.addValue(neighbor, mask, fullDiff);
                 }
 
                 pliE.get(clstId).add(t);
             }
 
-            // generate new diff
-            for (int i = 0; i < t; i++) {
-                if (diffFreq.addValue(diffHash[i], 1L, 0L) == 1L)
-                    newDiffs.add(diffHash[i]);
+            for (int diff : diffMap.values()) {
+                if (diffFreq.addValue(diff, 1L, 0L) == 1L)
+                    newDiffs.add(diff);
             }
+
+            nFullDiff += nTuples - diffMap.size();
+        }
+
+        if (nFullDiff == diffFreq.addValue(fullDiff, nFullDiff, 0L))
+            newDiffs.add(fullDiff);
+
+        diffSet.addAll(newDiffs);
+        NumSet.sortIntSets(nAttributes, diffSet);
+
+        nTuples = inversePli.size();
+
+        return newDiffs;
+    }
+
+    public List<Integer> initInsertData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli) {
+        HashIntIntMap diffMap = HashIntIntMaps.newMutableMap();
+
+        List<Integer> newDiffs = new ArrayList<>();
+        long[] nFullDiff = new long[]{0};
+
+        // for each newly inserted tuple, generate its diffs with all front tuples
+        ProgressBar.wrap(IntStream.range(nTuples, inversePli.size()), "Task").forEach(t -> {
+            // reset diffHash
+            diffMap.clear();
+
+            // update pli, generate diffHash
+            for (int e = 0; e < nAttributes; e++) {
+                List<List<Integer>> pliE = pli.get(e);
+                int clstId = inversePli.get(t).get(e);
+
+                if (clstId >= pliE.size())                      // new cluster
+                    pliE.add(new ArrayList<>());
+                else {                                          // existing cluster
+                    int mask = -(1 << e);
+                    for (int neighbor : pliE.get(clstId))
+                        diffMap.addValue(neighbor, mask, fullDiff);
+                }
+
+                pliE.get(clstId).add(t);
+            }
+
+            for (int diff : diffMap.values()) {
+                if (diffFreq.addValue(diff, 1L, 0L) == 1L)
+                    newDiffs.add(diff);
+            }
+
+            nFullDiff[0] += nTuples - diffMap.size();
         });
+
+        if (nFullDiff[0] == diffFreq.addValue(fullDiff, nFullDiff[0], 0L))
+            newDiffs.add(fullDiff);
 
         diffSet.addAll(newDiffs);
         NumSet.sortIntSets(nAttributes, diffSet);
@@ -158,14 +209,14 @@ public class DifferenceSet implements DifferenceSetInterface {
     /**
      * @return remaining Diffs
      */
-    public Set<Integer> removeData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli,
-                                   List<Integer> removedData, boolean[] removed) {
+    public Set<Integer> removeData1(List<List<List<Integer>>> pli, List<List<Integer>> inversePli,
+                                    List<Integer> removedData, boolean[] removed) {
         Set<Integer> removedDiffs = new HashSet<>();
         int[] diffHash = new int[inversePli.size()];
 
         for (int t : removedData) {
             // reset diffHash
-            Arrays.fill(diffHash, initHash);
+            Arrays.fill(diffHash, fullDiff);
 
             // generate diffHash
             for (int e = 0; e < nAttributes; e++) {
@@ -180,6 +231,40 @@ public class DifferenceSet implements DifferenceSetInterface {
                     removedDiffs.add(diffHash[i]);
             }
         }
+
+        diffSet.removeAll(removedDiffs);
+        nTuples -= removed.length;
+
+        return removedDiffs;
+    }
+
+    public Set<Integer> removeData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli,
+                                   List<Integer> removedData, boolean[] removed) {
+        Set<Integer> removedDiffs = new HashSet<>();
+        HashIntIntMap diffMap = HashIntIntMaps.newMutableMap();
+        long nFullDiff = 0;
+
+        for (int t : removedData) {
+            // reset diffHash
+            diffMap.clear();
+
+            // generate diffHash
+            for (int e = 0; e < nAttributes; e++) {
+                int mask = -(1 << e);
+                for (int neighbor : pli.get(e).get(inversePli.get(t).get(e)))
+                    if (!removed[neighbor] || neighbor < t) diffMap.addValue(neighbor, mask, fullDiff);
+            }
+
+            for (int diff : diffMap.values()) {
+                if (diffFreq.addValue(diff, -1L) == 0L)
+                    removedDiffs.add(diff);
+            }
+
+            nFullDiff += nTuples - diffMap.size();
+        }
+
+        if (0L == diffFreq.addValue(fullDiff, -nFullDiff))
+            removedDiffs.add(fullDiff);
 
         diffSet.removeAll(removedDiffs);
         nTuples -= removed.length;

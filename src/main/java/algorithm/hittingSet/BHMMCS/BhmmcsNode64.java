@@ -106,7 +106,7 @@ public class BhmmcsNode64 {
         elements |= 1L << e;
     }
 
-    void removeEle(long newElements, List<Integer> removed, List<List<Long>> subsetParts) {
+    void removeEle(long newElements, List<Integer> removedEles, List<List<Long>> subsetParts) {
         if (newElements == elements) return;
 
         elements = newElements;
@@ -114,7 +114,7 @@ public class BhmmcsNode64 {
         cand = (~elements) & Bhmmcs64.elementsMask;
 
         Set<Long> potentialCrit = new HashSet<>();
-        for (int e : removed) {
+        for (int e : removedEles) {
             crit.get(e).clear();
             potentialCrit.addAll(subsetParts.get(e));
         }

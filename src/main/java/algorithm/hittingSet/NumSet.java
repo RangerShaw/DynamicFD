@@ -236,14 +236,16 @@ public class NumSet {
         return allMinSets;
     }
 
-    public static List<Integer> findRemovedMinIntSets(List<Integer> removedSets, List<Integer> oldMinSets) {
+    public static List<Integer> findRemovedMinIntSets(List<Integer> removedSets, List<Integer> oldMinSets, List<Integer> minRmvdSubsets) {
         Set<Integer> minRemoved = new HashSet<>(removedSets);
-        List<Integer> minRmvdSubsets = new ArrayList<>();
+        List<Integer> newMinSets = new ArrayList<>();
 
-        for (int minSubset : oldMinSets)
-            if (minRemoved.contains(minSubset)) minRmvdSubsets.add(minSubset);
+        for (int set : oldMinSets) {
+            if (minRemoved.contains(set)) minRmvdSubsets.add(set);
+            else newMinSets.add(set);
+        }
 
-        return minRmvdSubsets;
+        return newMinSets;
     }
 
     public static List<Long> findRemovedMinLongSets(List<Long> removedSets, List<Long> oldMinSets) {
