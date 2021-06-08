@@ -122,7 +122,6 @@ public class DifferenceSet implements DifferenceSetInterface {
 
         // for each newly inserted tuple, generate its diffs with all front tuples
         for (int t = nTuples; t < inversePli.size(); t++) {
-            // reset diffHash
             diffMap.clear();
 
             // update pli, generate diffHash
