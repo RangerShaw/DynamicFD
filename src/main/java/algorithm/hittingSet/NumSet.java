@@ -199,7 +199,7 @@ public class NumSet {
     }
 
     public static List<Long> findMinLongSets(int nElements, List<Long> oldMinSets,
-                                               List<Long> newSets, List<Long> newMinSets, Set<Long> removed) {
+                                             List<Long> newSets, List<Long> newMinSets, Set<Long> removed) {
         List<Long> allMinSets = new ArrayList<>();    // min sets of all current sets
 
         boolean[] notMinNew = new boolean[newSets.size()];
@@ -237,11 +237,11 @@ public class NumSet {
     }
 
     public static List<Integer> findRemovedMinIntSets(List<Integer> removedSets, List<Integer> oldMinSets, List<Integer> minRmvdSubsets) {
-        Set<Integer> minRemoved = new HashSet<>(removedSets);
-        List<Integer> newMinSets = new ArrayList<>();
+        Set<Integer> removed = new HashSet<>(removedSets);
+        List<Integer> newMinSets = new ArrayList<>(Math.max(10, oldMinSets.size() - removed.size() / 2));
 
         for (int set : oldMinSets) {
-            if (minRemoved.contains(set)) minRmvdSubsets.add(set);
+            if (removed.contains(set)) minRmvdSubsets.add(set);
             else newMinSets.add(set);
         }
 

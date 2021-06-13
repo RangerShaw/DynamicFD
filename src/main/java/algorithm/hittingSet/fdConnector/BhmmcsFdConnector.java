@@ -80,12 +80,16 @@ public class BhmmcsFdConnector implements FdConnector {
         List<List<Integer>> subsetParts = new ArrayList<>(nElements);
 
         for (int i = 0; i < nElements; i++)
-            subsetParts.add(new ArrayList<>());
+            subsetParts.add(new ArrayList<>(subsets.size() / nElements));
 
-        for (int set : subsets)
-            for (int e : NumSet.indicesOfOnes(set))
-                subsetParts.get(e).add(set & ~(1 << e));
-
+        for (int set : subsets) {
+            int tmp = set, pos = 0;
+            while (tmp > 0) {
+                if ((tmp & 1) != 0) subsetParts.get(pos).add(set & ~(1 << pos));
+                pos++;
+                tmp >>>= 1;
+            }
+        }
         return subsetParts;
     }
 

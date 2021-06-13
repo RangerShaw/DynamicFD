@@ -158,7 +158,7 @@ public class BhmmcsNode {
         }
     }
 
-    void removeElesAndSubsets(int newElements, Set<Integer> removedSets, List<Integer> removedEles, List<List<Integer>> subsetParts, List<Integer> minSubsets) {
+    void removeElesAndSubsets(int newElements, Set<Integer> removedSets, List<Integer> removedEles, List<List<Integer>> subsetParts) {
         //if (newElements == elements) return;
 
         elements = newElements;
@@ -179,14 +179,6 @@ public class BhmmcsNode {
             if (critCover == -1) uncov.add(sb);
             else if (critCover >= 0) crit.get(critCover).add(sb);
         }
-
-//        for(var l : crit)
-//            l.clear();
-//        for (int sb : minSubsets) {
-//            int critCover = getCritCover(sb);
-//            if (critCover == -1) uncov.add(sb);
-//            else if (critCover >= 0) crit.get(critCover).add(sb);
-//        }
     }
 
     void updateContextFromChild(int e, BhmmcsNode originalNode, List<Integer> setsWithE) {

@@ -139,19 +139,42 @@ public class Bhmmcs {
         minSubsets.addAll(minExposedSets);
         NumSet.sortIntSets(nElements, minSubsets);
 
-//        // 3 remove subsets from nodes' crit and walk up if some crit is empty
-//        coverNodes = removeSubsetsFromNodes(minRemoved);
-//
-//        // 4 find all coverNode that intersect with minRemoved and re-walk
-//        coverNodes = rewalk(minRmvdSubsets);
-
         // remove the union of minRmvdSubsets from nodes' elements and remove minRmvdSubsets from nodes' crit
-        coverNodes = walkUp(minRmvdSubsets, minRemoved, minSubsets);
+        coverNodes = walkUp(minRmvdSubsets, minRemoved);
 
         coverNodes = walkDown(coverNodes);
     }
 
-    List<BhmmcsNode> walkUp(List<Integer> minRmvdSubsets, Set<Integer> removedSets, List<Integer> minSubsets) {
+    public void removeSubsets1(List<Integer> leftSubsets, List<Integer> rmvdSubsets) {
+        if (NumSet.removeEmptyIntSet(leftSubsets)) hasEmptySubset = true;
+        NumSet.removeEmptyIntSet(rmvdSubsets);
+
+        // 1 find all min removed subsets from minSubsets and update
+        List<Integer> minRmvdSubsets = new ArrayList<>();
+        minSubsets = NumSet.findRemovedMinIntSets(rmvdSubsets, minSubsets, minRmvdSubsets);
+
+        Set<Integer> minRemoved = new HashSet<>(minRmvdSubsets);
+
+        for (List<Integer> minSubsetPart : minSubsetParts)
+            minSubsetPart.removeAll(minRemoved);
+
+        // 2 find all min exposed subsets in leftSubsets and update
+        List<Integer> minExposedSets = NumSet.findMinExposedIntSets(minRmvdSubsets, leftSubsets);
+
+        for (int sb : minExposedSets)
+            for (int e : NumSet.indicesOfOnes(sb))
+                minSubsetParts.get(e).add(sb);
+
+        minSubsets.addAll(minExposedSets);
+        NumSet.sortIntSets(nElements, minSubsets);
+
+        // remove the union of minRmvdSubsets from nodes' elements and remove minRmvdSubsets from nodes' crit
+        coverNodes = walkUp(minRmvdSubsets, minRemoved);
+
+        coverNodes = walkDown(coverNodes);
+    }
+
+    List<BhmmcsNode> walkUp(List<Integer> minRmvdSubsets, Set<Integer> removedSets) {
         int removeCand = 0;
         for (int minRmvdSubset : minRmvdSubsets)
             removeCand |= minRmvdSubset;
@@ -163,7 +186,7 @@ public class Bhmmcs {
         for (BhmmcsNode nd : coverNodes) {
             int parentElements = nd.elements & ~removeCand;
             if (walked.add(parentElements)) {
-                nd.removeElesAndSubsets(parentElements, removedSets, removedEles, minSubsetParts, minSubsets);
+                nd.removeElesAndSubsets(parentElements, removedSets, removedEles, minSubsetParts);
                 newCoverNodes.add(nd);
             }
         }
