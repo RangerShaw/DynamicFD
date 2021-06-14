@@ -159,9 +159,7 @@ public class BhmmcsNode {
     }
 
     void removeElesAndSubsets(int newElements, Set<Integer> removedSets, List<Integer> removedEles, List<List<Integer>> subsetParts) {
-        //if (newElements == elements) return;
-
-        elements = newElements;
+         elements = newElements;
 
         cand = (~elements) & Bhmmcs.elementsMask;
 
