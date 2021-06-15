@@ -158,7 +158,7 @@ public class BhmmcsNode {
         }
     }
 
-    void removeElesAndSubsets(int newElements, Set<Integer> removedSets, List<Integer> removedEles, List<List<Integer>> subsetParts) {
+    void removeElesAndSubsets(int newElements, Set<Integer> removedSets, List<Integer> removedEles, List<Integer> revealed) {
          elements = newElements;
 
         cand = (~elements) & Bhmmcs.elementsMask;
@@ -166,13 +166,10 @@ public class BhmmcsNode {
         for (int e : NumSet.indicesOfOnes(elements))
             crit.get(e).removeAll(removedSets);
 
-        Set<Integer> potentialCrit = new HashSet<>();
-        for (int e : removedEles) {
+        for (int e : removedEles)
             crit.get(e).clear();
-            potentialCrit.addAll(subsetParts.get(e));
-        }
 
-        for (int sb : potentialCrit) {
+        for (int sb : revealed) {
             int critCover = getCritCover(sb);
             if (critCover == -1) uncov.add(sb);
             else if (critCover >= 0) crit.get(critCover).add(sb);

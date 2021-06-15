@@ -145,40 +145,17 @@ public class Bhmmcs {
         coverNodes = walkDown(coverNodes);
     }
 
-    public void removeSubsets1(List<Integer> leftSubsets, List<Integer> rmvdSubsets) {
-        if (NumSet.removeEmptyIntSet(leftSubsets)) hasEmptySubset = true;
-        NumSet.removeEmptyIntSet(rmvdSubsets);
-
-        // 1 find all min removed subsets from minSubsets and update
-        List<Integer> minRmvdSubsets = new ArrayList<>();
-        minSubsets = NumSet.findRemovedMinIntSets(rmvdSubsets, minSubsets, minRmvdSubsets);
-
-        Set<Integer> minRemoved = new HashSet<>(minRmvdSubsets);
-
-        for (List<Integer> minSubsetPart : minSubsetParts)
-            minSubsetPart.removeAll(minRemoved);
-
-        // 2 find all min exposed subsets in leftSubsets and update
-        List<Integer> minExposedSets = NumSet.findMinExposedIntSets(minRmvdSubsets, leftSubsets);
-
-        for (int sb : minExposedSets)
-            for (int e : NumSet.indicesOfOnes(sb))
-                minSubsetParts.get(e).add(sb);
-
-        minSubsets.addAll(minExposedSets);
-        NumSet.sortIntSets(nElements, minSubsets);
-
-        // remove the union of minRmvdSubsets from nodes' elements and remove minRmvdSubsets from nodes' crit
-        coverNodes = walkUp(minRmvdSubsets, minRemoved);
-
-        coverNodes = walkDown(coverNodes);
-    }
-
     List<BhmmcsNode> walkUp(List<Integer> minRmvdSubsets, Set<Integer> removedSets) {
         int removeCand = 0;
         for (int minRmvdSubset : minRmvdSubsets)
             removeCand |= minRmvdSubset;
+
         List<Integer> removedEles = NumSet.indicesOfOnes(removeCand);
+
+        List<Integer> revealed = new ArrayList<>();
+        for (int e : removedEles)
+            revealed.addAll(minSubsetParts.get(e));
+        revealed = revealed.stream().distinct().collect(Collectors.toList());
 
         Set<Integer> walked = new HashSet<>();
         List<BhmmcsNode> newCoverNodes = new ArrayList<>(coverNodes.size());
@@ -186,7 +163,7 @@ public class Bhmmcs {
         for (BhmmcsNode nd : coverNodes) {
             int parentElements = nd.elements & ~removeCand;
             if (walked.add(parentElements)) {
-                nd.removeElesAndSubsets(parentElements, removedSets, removedEles, minSubsetParts);
+                nd.removeElesAndSubsets(parentElements, removedSets, removedEles, revealed);
                 newCoverNodes.add(nd);
             }
         }
