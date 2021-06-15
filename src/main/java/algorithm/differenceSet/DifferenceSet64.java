@@ -142,10 +142,10 @@ public class DifferenceSet64 implements DifferenceSetInterface {
                     newDiffs.add(diff);
             }
 
-            nFullDiff += nTuples - diffMap.size();
+            nFullDiff += t - diffMap.size();
         }
 
-        if (nFullDiff == diffFreq.addValue(fullDiff, nFullDiff, 0L))
+        if (nFullDiff > 0 && nFullDiff == diffFreq.addValue(fullDiff, nFullDiff, 0L))
             newDiffs.add(fullDiff);
 
         diffSet.addAll(newDiffs);
@@ -231,12 +231,14 @@ public class DifferenceSet64 implements DifferenceSetInterface {
     }
 
     public Set<Long> removeData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli,
-                                List<Integer> removedData, boolean[] removed) {
+                                List<Integer> removedTuples, boolean[] removed) {
         Set<Long> removedDiffs = new HashSet<>();
         HashIntLongMap diffMap = HashIntLongMaps.newMutableMap();
         long nFullDiff = 0;
 
-        for (int t : removedData) {
+        for (int i = 0; i < removedTuples.size(); i++) {
+            int t = removedTuples.get(i);
+
             // reset diffHash
             diffMap.clear();
 
@@ -250,13 +252,13 @@ public class DifferenceSet64 implements DifferenceSetInterface {
             }
 
             // generate removed diff
-            for (long diff : diffMap.values()) {
-                if (diffFreq.addValue(diff, -1L) == 0L)
-                    removedDiffs.add(diff);
-            }
+            for (long diff : diffMap.values())
+                if (diffFreq.addValue(diff, -1L) == 0L) removedDiffs.add(diff);
+
+            nFullDiff += nTuples - removedTuples.size() + i - diffMap.size();
         }
 
-        if (0L == diffFreq.addValue(fullDiff, -nFullDiff))
+        if (nFullDiff > 0 && 0L == diffFreq.addValue(fullDiff, -nFullDiff))
             removedDiffs.add(fullDiff);
 
         diffSet.removeAll(removedDiffs);

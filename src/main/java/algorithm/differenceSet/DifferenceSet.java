@@ -145,10 +145,10 @@ public class DifferenceSet implements DifferenceSetInterface {
                     newDiffs.add(diff);
             }
 
-            nFullDiff += nTuples - diffMap.size();
+            nFullDiff += t - diffMap.size();
         }
 
-        if (nFullDiff == diffFreq.addValue(fullDiff, nFullDiff, 0L))
+        if (nFullDiff > 0 && nFullDiff == diffFreq.addValue(fullDiff, nFullDiff, 0L))
             newDiffs.add(fullDiff);
 
         diffSet.addAll(newDiffs);
@@ -191,11 +191,13 @@ public class DifferenceSet implements DifferenceSetInterface {
                     newDiffs.add(diff);
             }
 
-            nFullDiff[0] += nTuples - diffMap.size();
+            nFullDiff[0] += t - diffMap.size();
         });
 
-        if (nFullDiff[0] == diffFreq.addValue(fullDiff, nFullDiff[0], 0L))
+        if (nFullDiff[0] > 0) {
+            diffFreq.addValue(fullDiff, nFullDiff[0], 0L);
             newDiffs.add(fullDiff);
+        }
 
         diffSet.addAll(newDiffs);
         NumSet.sortIntSets(nAttributes, diffSet);
@@ -237,13 +239,14 @@ public class DifferenceSet implements DifferenceSetInterface {
         return removedDiffs;
     }
 
-    public Set<Integer> removeData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli,
-                                   List<Integer> removedData, boolean[] removed) {
+    public Set<Integer> removeData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli, List<Integer> removedTuples, boolean[] removed) {
         Set<Integer> removedDiffs = new HashSet<>();
         HashIntIntMap diffMap = HashIntIntMaps.newMutableMap();
         long nFullDiff = 0;
 
-        for (int t : removedData) {
+        for (int i = 0; i < removedTuples.size(); i++) {
+            int t = removedTuples.get(i);
+
             // reset diffHash
             diffMap.clear();
 
@@ -259,10 +262,10 @@ public class DifferenceSet implements DifferenceSetInterface {
                     removedDiffs.add(diff);
             }
 
-            nFullDiff += nTuples - diffMap.size();
+            nFullDiff += nTuples - removedTuples.size() + i - diffMap.size();
         }
 
-        if (0L == diffFreq.addValue(fullDiff, -nFullDiff))
+        if (nFullDiff > 0 && 0L == diffFreq.addValue(fullDiff, -nFullDiff))
             removedDiffs.add(fullDiff);
 
         diffSet.removeAll(removedDiffs);
