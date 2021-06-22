@@ -20,9 +20,6 @@ public class BhmmcsNode64 {
      */
     private List<Long> uncov;
 
-    /**
-     * crit[i]: sets for which element i is crucial
-     */
     ArrayList<ArrayList<Long>> crit;
 
 

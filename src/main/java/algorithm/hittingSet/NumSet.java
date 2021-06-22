@@ -1,5 +1,7 @@
 package algorithm.hittingSet;
 
+import algorithm.hittingSet.AMMCS.Subset;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -137,6 +139,13 @@ public class NumSet {
     public static boolean removeEmptyLongSet(List<Long> sets) {
         // sets should be sorted already
         if (sets.isEmpty() || sets.get(0) != 0) return false;
+        sets.remove(0);
+        return true;
+    }
+
+    public static boolean removeEmptySubSet(List<Subset> sets) {
+        // sets should be sorted already
+        if (sets.isEmpty() || sets.get(0).set != 0) return false;
         sets.remove(0);
         return true;
     }
