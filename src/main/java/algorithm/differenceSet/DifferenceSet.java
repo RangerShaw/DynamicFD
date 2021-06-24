@@ -72,7 +72,7 @@ public class DifferenceSet implements DifferenceSetInterface {
     /**
      * @return new Diffs
      */
-    public List<Integer> insertData1(List<List<List<Integer>>> pli, List<List<Integer>> inversePli) {
+    public List<Integer> insertData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli) {
         int[] diffHash = new int[inversePli.size()];
 
         List<Integer> newDiffs = new ArrayList<>();
@@ -114,7 +114,7 @@ public class DifferenceSet implements DifferenceSetInterface {
         return newDiffs;
     }
 
-    public List<Integer> insertData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli) {
+    public List<Integer> insertData1(List<List<List<Integer>>> pli, List<List<Integer>> inversePli) {
         HashIntIntMap diffMap = HashIntIntMaps.newMutableMap();   // neighbor -> diff with it
 
         List<Integer> newDiffs = new ArrayList<>();
@@ -210,14 +210,15 @@ public class DifferenceSet implements DifferenceSetInterface {
     /**
      * @return remaining Diffs
      */
-    public Set<Integer> removeData1(List<List<List<Integer>>> pli, List<List<Integer>> inversePli,
+    public Set<Integer> removeData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli,
                                     List<Integer> removedData, boolean[] removed) {
         Set<Integer> removedDiffs = new HashSet<>();
         int[] diffHash = new int[inversePli.size()];
 
         for (int t : removedData) {
             // reset diffHash
-            Arrays.fill(diffHash, fullDiff);
+            for (int i = 0; i < t; i++)
+                diffHash[i] = fullDiff;
 
             // generate diffHash
             for (int e = 0; e < nAttributes; e++) {
@@ -239,7 +240,7 @@ public class DifferenceSet implements DifferenceSetInterface {
         return removedDiffs;
     }
 
-    public Set<Integer> removeData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli, List<Integer> removedTuples, boolean[] removed) {
+    public Set<Integer> removeData1(List<List<List<Integer>>> pli, List<List<Integer>> inversePli, List<Integer> removedTuples, boolean[] removed) {
         Set<Integer> removedDiffs = new HashSet<>();
         HashIntIntMap diffMap = HashIntIntMaps.newMutableMap();
         long nFullDiff = 0;

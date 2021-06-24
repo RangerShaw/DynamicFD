@@ -171,66 +171,6 @@ public class Bhmmcs {
         return newCoverNodes;
     }
 
-    List<BhmmcsNode> removeSubsetsFromNodes(Set<Integer> minRemoved) {
-        List<BhmmcsNode> newCoverNodes = new ArrayList<>(coverNodes.size());
-        Set<Integer> walked = new HashSet<>();
-
-        for (BhmmcsNode nd : coverNodes) {
-            List<Integer> redundantEles = nd.removeSubsets(minRemoved);
-            int parentElements = nd.getParentElements(redundantEles);
-            if (walked.add(parentElements)) {
-                nd.removeEles(parentElements, redundantEles, minSubsetParts);
-                newCoverNodes.add(nd);
-            }
-        }
-
-        return newCoverNodes;
-    }
-
-    List<BhmmcsNode> rewalk(List<Integer> minRmvdSubsets) {
-        // remove elements appearing in minRmvdSubsets
-        List<BhmmcsNode> newCoverNodes = new ArrayList<>();
-
-        int removeCand = 0;
-        for (int minRmvdSubset : minRmvdSubsets)
-            removeCand |= minRmvdSubset;
-        List<Integer> removeEles = NumSet.indicesOfOnes(removeCand);
-
-        // re-walk down
-        Set<Integer> walked = new HashSet<>();
-        for (BhmmcsNode nd : coverNodes) {
-            int parentElements = nd.getParentElements(removeCand);
-            if (walked.add(parentElements)) {
-                nd.removeEles(parentElements, removeEles, minSubsetParts);
-                newCoverNodes.add(nd);
-            }
-        }
-
-        return walkDown(newCoverNodes);
-    }
-
-
-    List<BhmmcsNode> rewalk(List<Integer> minRmvdSubsets, boolean[] hasExposed) {
-        List<BhmmcsNode> newCoverNodes = new ArrayList<>();
-
-        int removeCand = 0;
-        for (int i = 0; i < minRmvdSubsets.size(); i++)
-            // TODO: may miss some covers
-            //if (hasExposed[i])
-            removeCand |= minRmvdSubsets.get(i);
-        List<Integer> removeEles = NumSet.indicesOfOnes(removeCand);
-
-        Set<Integer> walked = new HashSet<>();
-        for (BhmmcsNode nd : coverNodes) {
-            int parentElements = nd.getParentElements(removeCand);
-            if (walked.add(parentElements)) {
-                nd.removeEles(parentElements, removeEles, minSubsetParts);
-                newCoverNodes.add(nd);
-            }
-        }
-
-        return walkDown(newCoverNodes);
-    }
 
     public void removeSubsetsRestart(List<Integer> leftSubsets) {
         initiate(leftSubsets);

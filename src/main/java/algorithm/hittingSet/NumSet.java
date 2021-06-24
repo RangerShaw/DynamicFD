@@ -257,14 +257,16 @@ public class NumSet {
         return newMinSets;
     }
 
-    public static List<Long> findRemovedMinLongSets(List<Long> removedSets, List<Long> oldMinSets) {
-        Set<Long> minRemoved = new HashSet<>(removedSets);
-        List<Long> minRmvdSubsets = new ArrayList<>();
+    public static List<Long> findRemovedMinLongSets(List<Long> removedSets, List<Long> oldMinSets, List<Long> minRmvdSubsets) {
+        Set<Long> removed = new HashSet<>(removedSets);
+        List<Long> newMinSets = new ArrayList<>(Math.max(10, oldMinSets.size() - removed.size() / 2));
 
-        for (long minSubset : oldMinSets)
-            if (minRemoved.contains(minSubset)) minRmvdSubsets.add(minSubset);
+        for (long set : oldMinSets) {
+            if (removed.contains(set)) minRmvdSubsets.add(set);
+            else newMinSets.add(set);
+        }
 
-        return minRmvdSubsets;
+        return newMinSets;
     }
 
     public static List<Integer> findMinExposedIntSets(List<Integer> minRemovedSets, List<Integer> leftSubsets) {

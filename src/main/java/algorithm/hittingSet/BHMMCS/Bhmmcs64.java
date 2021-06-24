@@ -121,10 +121,11 @@ public class Bhmmcs64 {
         NumSet.removeEmptyLongSet(rmvdSubsets);
 
         // 1 find all min removed subsets from minSubsets and update
-        List<Long> minRmvdSubsets = NumSet.findRemovedMinLongSets(rmvdSubsets, minSubsets);
+        List<Long> minRmvdSubsets = new ArrayList<>();
+        minSubsets = NumSet.findRemovedMinLongSets(rmvdSubsets, minSubsets, minRmvdSubsets);
+
         Set<Long> minRemoved = new HashSet<>(minRmvdSubsets);
 
-        minSubsets.removeAll(minRemoved);
         for (List<Long> minSubsetPart : minSubsetParts)
             minSubsetPart.removeAll(minRemoved);
 
@@ -139,48 +140,36 @@ public class Bhmmcs64 {
         NumSet.sortLongSets(nElements, minSubsets);
 
         // 3 remove subsets from nodes' crit and walk up if some crit is empty
-        coverNodes = removeSubsetsFromNodes(minRemoved);
+        coverNodes = walkUp(minRmvdSubsets, minRemoved);
 
         // 4 find all coverNode that intersect with minRemoved and re-walk
-        coverNodes = rewalk(minRmvdSubsets);
+        coverNodes = walkDown(coverNodes);
     }
 
-    List<BhmmcsNode64> removeSubsetsFromNodes(Set<Long> minRemoved) {
-        List<BhmmcsNode64> newCoverNodes = new ArrayList<>(coverNodes.size());
+    List<BhmmcsNode64> walkUp(List<Long> minRmvdSubsets, Set<Long> removedSets) {
+        long removeCand = 0;
+        for (long minRmvdSubset : minRmvdSubsets)
+            removeCand |= minRmvdSubset;
+
+        List<Integer> removedEles = NumSet.indicesOfOnes(removeCand);
+
+        List<Long> revealed = new ArrayList<>();
+        for (int e : removedEles)
+            revealed.addAll(minSubsetParts.get(e));
+        revealed = revealed.stream().distinct().collect(Collectors.toList());
+
         Set<Long> walked = new HashSet<>();
+        List<BhmmcsNode64> newCoverNodes = new ArrayList<>(coverNodes.size());
 
         for (BhmmcsNode64 nd : coverNodes) {
-            List<Integer> redundantEles = nd.removeSubsets(minRemoved);
-            long parentElements = nd.getParentElements(redundantEles);
+            long parentElements = nd.elements & ~removeCand;
             if (walked.add(parentElements)) {
-                nd.removeEle(parentElements, redundantEles, minSubsetParts);
+                nd.removeElesAndSubsets(parentElements, removedSets, removedEles, revealed);
                 newCoverNodes.add(nd);
             }
         }
 
         return newCoverNodes;
-    }
-
-    List<BhmmcsNode64> rewalk(List<Long> minRmvdSubsets) {
-        // remove elements appearing in minRmvdSubsets
-        List<BhmmcsNode64> newCoverNodes = new ArrayList<>();
-
-        int removeCand = 0;
-        for (Long minRmvdSubset : minRmvdSubsets)
-            removeCand |= minRmvdSubset;
-        List<Integer> removeEles = NumSet.indicesOfOnes(removeCand);
-
-        // re-walk down
-        Set<Long> walked = new HashSet<>();
-        for (BhmmcsNode64 nd : coverNodes) {
-            long parentElements = nd.getParentElements(removeCand);
-            if (walked.add(parentElements)) {
-                nd.removeEle(parentElements, removeEles, minSubsetParts);
-                newCoverNodes.add(nd);
-            }
-        }
-
-        return walkDown(newCoverNodes);
     }
 
 

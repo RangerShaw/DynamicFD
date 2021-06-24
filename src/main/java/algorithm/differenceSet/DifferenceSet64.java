@@ -69,7 +69,7 @@ public class DifferenceSet64 implements DifferenceSetInterface {
     /**
      * @return new Diffs
      */
-    public List<Long> insertData1(List<List<List<Integer>>> pli, List<List<Integer>> inversePli) {
+    public List<Long> insertData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli) {
         long[] diffHash = new long[inversePli.size()];
 
         List<Long> newDiffs = new ArrayList<>();
@@ -111,7 +111,7 @@ public class DifferenceSet64 implements DifferenceSetInterface {
         return newDiffs;
     }
 
-    public List<Long> insertData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli) {
+    public List<Long> insertData1(List<List<List<Integer>>> pli, List<List<Integer>> inversePli) {
         HashIntLongMap diffMap = HashIntLongMaps.newMutableMap();   // neighbor -> diff with it
         List<Long> newDiffs = new ArrayList<>();
         long nFullDiff = 0;
@@ -201,7 +201,7 @@ public class DifferenceSet64 implements DifferenceSetInterface {
     /**
      * @return remaining Diffs
      */
-    public Set<Long> removeData1(List<List<List<Integer>>> pli, List<List<Integer>> inversePli,
+    public Set<Long> removeData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli,
                                  List<Integer> removedData, boolean[] removed) {
         Set<Long> removedDiffs = new HashSet<>();
         long[] diffHash = new long[inversePli.size()];
@@ -230,7 +230,7 @@ public class DifferenceSet64 implements DifferenceSetInterface {
         return removedDiffs;
     }
 
-    public Set<Long> removeData(List<List<List<Integer>>> pli, List<List<Integer>> inversePli,
+    public Set<Long> removeData1(List<List<List<Integer>>> pli, List<List<Integer>> inversePli,
                                 List<Integer> removedTuples, boolean[] removed) {
         Set<Long> removedDiffs = new HashSet<>();
         HashIntLongMap diffMap = HashIntLongMaps.newMutableMap();

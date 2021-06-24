@@ -8,16 +8,11 @@ public class BhmmcsNode64 {
 
     private int nElements;
 
-    /**
-     * elements of current node
-     */
     long elements;
 
     long cand;
 
-    /**
-     * uncovered sets
-     */
+
     private List<Long> uncov;
 
     ArrayList<ArrayList<Long>> crit;
@@ -151,6 +146,25 @@ public class BhmmcsNode64 {
         return redundantEles;
     }
 
+    void removeElesAndSubsets(long newElements, Set<Long> removedSets, List<Integer> removedEles, List<Long> revealed) {
+        elements = newElements;
+
+        cand = (~elements) & Bhmmcs64.elementsMask;
+
+        for (int e : NumSet.indicesOfOnes(elements))
+            crit.get(e).removeAll(removedSets);
+
+        for (int e : removedEles)
+            crit.get(e).clear();
+
+        for (long sb : revealed) {
+            int critCover = getCritCover(sb);
+            if (critCover == -1) uncov.add(sb);
+            else if (critCover >= 0) crit.get(critCover).add(sb);
+        }
+    }
+
+
     long getParentElements(List<Integer> redundantEles) {
         long parentElements = elements;
         for (int i : redundantEles)
@@ -171,7 +185,7 @@ public class BhmmcsNode64 {
      */
     int getCritCover(long sb) {
         long and = sb & elements;
-        if (and == 0) return -1;
+        if (and == 0L) return -1;
 
         int ffs = Long.numberOfTrailingZeros(and);
         return and == (1L << ffs) ? ffs : -2;
