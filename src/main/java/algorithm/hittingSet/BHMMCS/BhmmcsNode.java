@@ -6,35 +6,23 @@ import java.util.*;
 
 public class BhmmcsNode {
 
-    private int nElements;
-
-    /**
-     * elements of current node
-     */
     int elements;
 
     int cand;
 
-    /**
-     * uncovered sets
-     */
+
     private List<Integer> uncov;
 
-    /**
-     * crit[i]: sets for which element i is crucial
-     */
-    ArrayList<ArrayList<Integer>> crit;
+    List<List<Integer>> crit;
 
 
-    private BhmmcsNode(int nEle) {
-        nElements = nEle;
+    private BhmmcsNode() {
     }
 
     /**
      * for initiation only
      */
-    BhmmcsNode(int nEle, List<Integer> setsToCover) {
-        nElements = nEle;
+    BhmmcsNode(int nElements, List<Integer> setsToCover) {
         elements = 0;
         uncov = new ArrayList<>(setsToCover);
 
@@ -87,7 +75,7 @@ public class BhmmcsNode {
     }
 
     BhmmcsNode getChildNode(int e, int childCand) {
-        BhmmcsNode childNode = new BhmmcsNode(nElements);
+        BhmmcsNode childNode = new BhmmcsNode();
         childNode.cloneContextFromParent(childCand, this);
         childNode.updateContextFromParent(e, this);
         return childNode;
@@ -97,8 +85,8 @@ public class BhmmcsNode {
         elements = originalNode.elements;
         cand = outerCand;
 
-        crit = new ArrayList<>(nElements);
-        for (int i = 0; i < nElements; i++)
+        crit = new ArrayList<>();
+        for (int i = 0; i < originalNode.crit.size(); i++)
             crit.add(new ArrayList<>(originalNode.crit.get(i)));
     }
 
@@ -114,48 +102,6 @@ public class BhmmcsNode {
             crit.get(u).removeIf(F -> (F & (1 << e)) != 0);
 
         elements |= 1 << e;
-    }
-
-    BhmmcsNode getParentNode(int e, List<Integer> setsWithE) {
-        BhmmcsNode parentNode = new BhmmcsNode(nElements);
-        parentNode.updateContextFromChild(e, this, setsWithE);
-        return parentNode;
-    }
-
-    void removeEles(int e, List<Integer> setsWithE) {
-        if ((elements & (1 << e)) == 0) return;
-
-        elements &= ~(1 << e);
-
-        cand = (~elements) & Bhmmcs.elementsMask;
-
-        crit.get(e).clear();
-
-        for (int sb : setsWithE) {
-            int critCover = getCritCover(sb);
-            if (critCover == -1) uncov.add(sb);
-            else if (critCover >= 0) crit.get(critCover).add(sb);
-        }
-    }
-
-    void removeEles(int newElements, List<Integer> removedEles, List<List<Integer>> subsetParts) {
-        //if (newElements == elements) return;
-
-        elements = newElements;
-
-        cand = (~elements) & Bhmmcs.elementsMask;
-
-        Set<Integer> potentialCrit = new HashSet<>();
-        for (int e : removedEles) {
-            crit.get(e).clear();
-            potentialCrit.addAll(subsetParts.get(e));
-        }
-
-        for (int sb : potentialCrit) {
-            int critCover = getCritCover(sb);
-            if (critCover == -1) uncov.add(sb);
-            else if (critCover >= 0) crit.get(critCover).add(sb);
-        }
     }
 
     void removeElesAndSubsets(int newElements, Set<Integer> removedSets, List<Integer> removedEles, List<Integer> revealed) {
@@ -176,23 +122,6 @@ public class BhmmcsNode {
         }
     }
 
-    void updateContextFromChild(int e, BhmmcsNode originalNode, List<Integer> setsWithE) {
-        elements = originalNode.elements;
-        elements &= ~(1 << e);
-
-        cand = (~elements) & Bhmmcs.elementsMask;
-
-        uncov = new ArrayList<>();
-
-        crit = new ArrayList<>(nElements);
-        for (int i = 0; i < nElements; i++)
-            crit.add(new ArrayList<>(originalNode.crit.get(i)));
-        for (int sb : setsWithE) {
-            int critCover = getCritCover(sb);
-            if (critCover >= 0) crit.get(critCover).add(sb);
-        }
-    }
-
     boolean insertSubsets(List<Integer> newSubsets, Set<Integer> rmvMinSubsets) {
         List<Integer> eles = NumSet.indicesOfOnes(elements);
 
@@ -206,30 +135,6 @@ public class BhmmcsNode {
         }
 
         return eles.stream().noneMatch(e -> crit.get(e).isEmpty());
-    }
-
-    List<Integer> removeSubsets(Set<Integer> removedSets) {
-        cand = ~elements & Bhmmcs.elementsMask;
-
-        List<Integer> redundantEles = new ArrayList<>();
-
-        for (int e : NumSet.indicesOfOnes(elements)) {
-            crit.get(e).removeIf(removedSets::contains);
-            if (crit.get(e).isEmpty()) redundantEles.add(e);
-        }
-
-        return redundantEles;
-    }
-
-    int getParentElements(List<Integer> redundantEles) {
-        int parentElements = elements;
-        for (int i : redundantEles)
-            parentElements &= ~(1 << i);
-        return parentElements;
-    }
-
-    int getParentElements(int redundantEles) {
-        return elements & ~redundantEles;
     }
 
     void resetCand() {

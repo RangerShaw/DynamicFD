@@ -13,7 +13,7 @@ public class Bhmmcs64 {
 
     private final int nElements;
 
-    static long  elementsMask;
+    static long elementsMask;
 
 
     /**
@@ -24,7 +24,6 @@ public class Bhmmcs64 {
 
     List<Long> minSubsets;
 
-    List<List<Long>> minSubsetParts;
 
     List<BhmmcsNode64> coverNodes;
 
@@ -40,13 +39,6 @@ public class Bhmmcs64 {
         if (NumSet.removeEmptyLongSet(subsets)) hasEmptySubset = true;
 
         minSubsets = NumSet.findMinLongSets(subsets);
-
-        minSubsetParts = new ArrayList<>();
-        for (int i = 0; i < nElements; i++)
-            minSubsetParts.add(new ArrayList<>());
-        for (long sb : minSubsets)
-            for (int e : NumSet.indicesOfOnes(sb))
-                minSubsetParts.get(e).add(sb);
 
         coverNodes = walkDown(new BhmmcsNode64(nElements, minSubsets));
     }
@@ -92,10 +84,6 @@ public class Bhmmcs64 {
         Set<Long> rmvMinSubsets = new HashSet<>();
         minSubsets = NumSet.findMinLongSets(nElements, minSubsets, insertedSubsets, newMinSubsets, rmvMinSubsets);
 
-        for (long sb : newMinSubsets)
-            for (int e : NumSet.indicesOfOnes(sb))
-                minSubsetParts.get(e).add(sb);
-
         List<BhmmcsNode64> coverNodes1 = new ArrayList<>();
         for (BhmmcsNode64 prevNode : coverNodes) {
             if (prevNode.insertSubsets(newMinSubsets, rmvMinSubsets))
@@ -126,15 +114,8 @@ public class Bhmmcs64 {
 
         Set<Long> minRemoved = new HashSet<>(minRmvdSubsets);
 
-        for (List<Long> minSubsetPart : minSubsetParts)
-            minSubsetPart.removeAll(minRemoved);
-
         // 2 find all min exposed subsets in leftSubsets and update
         List<Long> minExposedSets = NumSet.findMinExposedLongSets(minRmvdSubsets, leftSubsets);
-
-        for (long sb : minExposedSets)
-            for (int e : NumSet.indicesOfOnes(sb))
-                minSubsetParts.get(e).add(sb);
 
         minSubsets.addAll(minExposedSets);
         NumSet.sortLongSets(nElements, minSubsets);
@@ -151,16 +132,15 @@ public class Bhmmcs64 {
         for (long minRmvdSubset : minRmvdSubsets)
             removeCand |= minRmvdSubset;
 
-        List<Integer> removedEles = NumSet.indicesOfOnes(removeCand);
-
         List<Long> revealed = new ArrayList<>();
-        for (int e : removedEles)
-            revealed.addAll(minSubsetParts.get(e));
-        revealed = revealed.stream().distinct().collect(Collectors.toList());
+        for (long set : minSubsets) {
+            if ((set & removeCand) != 0) revealed.add(set);
+        }
 
         Set<Long> walked = new HashSet<>();
         List<BhmmcsNode64> newCoverNodes = new ArrayList<>(coverNodes.size());
 
+        List<Integer> removedEles = NumSet.indicesOfOnes(removeCand);
         for (BhmmcsNode64 nd : coverNodes) {
             long parentElements = nd.elements & ~removeCand;
             if (walked.add(parentElements)) {
@@ -179,15 +159,15 @@ public class Bhmmcs64 {
 
     public List<Long> getSortedMinCoverSets() {
         return hasEmptySubset ? new ArrayList<>() : coverNodes.stream()
-            .map(BhmmcsNode64::getElements)
-            .sorted()
-            .collect(Collectors.toList());
+                .map(BhmmcsNode64::getElements)
+                .sorted()
+                .collect(Collectors.toList());
     }
 
     public List<Long> getMinCoverSets() {
         return hasEmptySubset ? new ArrayList<>() : coverNodes.stream()
-            .map(BhmmcsNode64::getElements)
-            .collect(Collectors.toList());
+                .map(BhmmcsNode64::getElements)
+                .collect(Collectors.toList());
     }
 
 }
