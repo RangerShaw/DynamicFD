@@ -1,6 +1,9 @@
 package benchmark;
 
+import algorithm.appDifferenceSet.AppDiffConnector;
 import algorithm.differenceSet.DiffConnector;
+import algorithm.hittingSet.AMMCS.AmmcsFdConnector64;
+import algorithm.hittingSet.AMMCS.Subset;
 import algorithm.hittingSet.fdConnector.BhmmcsFdConnector64;
 import algorithm.hittingSet.fdConnector.FdConnector;
 import me.tongfei.progressbar.ProgressBar;
@@ -14,6 +17,26 @@ import static benchmark.DataFp.*;
 import static benchmark.DataFp.REMOVE_INPUT_BASE_DIFF;
 
 public class TestCase {
+
+    public static void testApp(int dataset, double threshold) {
+        // load base data
+        System.out.println("[INITIALIZING]...");
+        List<List<String>> csvData = DataIO.readCsvFile(INSERT_INPUT_BASE_DATA[dataset]);
+
+        // initiate pli and differenceSet
+        long startTime = System.nanoTime();
+        AppDiffConnector diffConnector = new AppDiffConnector();
+        List<Subset> initDiffSets = diffConnector.generatePliAndDiff(csvData, INSERT_INPUT_BASE_DIFF[dataset]);
+        System.out.println("  diff time: " + (System.nanoTime() - startTime) / 1000000 + "ms");
+        System.out.println("  # of initial Diff: " + initDiffSets.size());
+
+        // initiate FD
+        long startTime1 = System.nanoTime();
+        AmmcsFdConnector64 fdConnector = new AmmcsFdConnector64();
+        fdConnector.initiate(threshold, diffConnector.nElements, initDiffSets);
+        System.out.println("  diff time: " + (System.nanoTime() - startTime1) / 1000000 + "ms");
+        System.out.println("  # of initial FD: " + fdConnector.getMinFDs().stream().map(List::size).reduce(0, Integer::sum));
+    }
 
     public static void testDiff(int dataset) {
         for (int d = 0, size = DIFF_INPUT_DATA[dataset].length; d < size; d++) {
@@ -61,7 +84,7 @@ public class TestCase {
 
         ProgressBar.wrap(IntStream.range(0, removedDatas.size()), "testInsertDiff").forEach(i -> {
             Set<? extends Number> removedDiffs = diffConnector.removeData(removedDatas.get(i));
-            System.out.println("# of diff "+i+": "+diffConnector.getDiffSet().size());
+            System.out.println("# of diff " + i + ": " + diffConnector.getDiffSet().size());
             DataIO.printLongDiffMap(diffConnector.nElements, (Map<Long, Long>) diffConnector.getDiffFreq(), REMOVE_OUTPUT_CURR_DIFF[dataset][i]);
         });
     }

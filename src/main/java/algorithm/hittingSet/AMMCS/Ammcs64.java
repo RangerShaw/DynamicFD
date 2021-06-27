@@ -1,11 +1,13 @@
 package algorithm.hittingSet.AMMCS;
 
+import algorithm.hittingSet.BHMMCS.BhmmcsNode64;
 import algorithm.hittingSet.NumSet;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Ammcs64 {
 
@@ -13,22 +15,23 @@ public class Ammcs64 {
 
     static long elementsMask;
 
-    static long nMaxError;
+    long nMaxError;
 
 
     List<AmmcsNode64> coverNodes;
 
 
-    public Ammcs64(int nEle, long MaxError) {
+    public Ammcs64(int nEle) {
         nElements = nEle;
-        nMaxError = MaxError;
 
         for (int i = 0; i < nEle; i++)
             elementsMask |= 1L << i;
     }
 
-    public void initiate(List<Subset> subsets) {
-        coverNodes = walkDown(new AmmcsNode64(nElements, subsets));
+    public void initiate(List<Subset> subsets, double threshold) {
+        long nSubsets =subsets.stream().map(sb -> sb.count).reduce(0L, Long::sum);
+        nMaxError = (long) threshold * nSubsets;
+        coverNodes = walkDown(new AmmcsNode64(nElements, subsets, nSubsets));
     }
 
 
@@ -44,26 +47,36 @@ public class Ammcs64 {
     void walkDown(AmmcsNode64 nd, List<AmmcsNode64> newNodes, Set<Long> walked) {
         if (!walked.add(nd.elements)) return;
 
-        if (nd.isCover() && nd.isGlobalMinimal()) {
+        if (nd.isCover(nMaxError) && nd.isGlobalMinimal(nMaxError)) {
             nd.resetCand();
             newNodes.add(nd);
             return;
         }
 
-        if(nd.uncov.isEmpty()) return;
+        Long F = nd.chooseF();
+        if (F == null) return;
 
-        // configure cand for child nodes
-        long childCand = nd.cand;
-        long addCandidates = nd.getAddCandidates();
-        childCand &= ~(addCandidates);
+        // 1. doesn't hit F
+        long childCand1 = nd.cand & ~F;
+        AmmcsNode64 childNode1 = nd.getChildNode(childCand1);
+
+        if (childNode1.willCover(nMaxError)) walkDown(childNode1, newNodes, walked);
+
+        // 2. hit F
+        long addCandidates = nd.cand & F;
+        long childCand = nd.cand & ~addCandidates;
 
         for (int e : NumSet.indicesOfOnes(addCandidates)) {
             AmmcsNode64 childNode = nd.getChildNode(e, childCand);
-            if (childNode.isGlobalMinimal()) {
+            if (childNode.allCrit()) {
                 walkDown(childNode, newNodes, walked);
                 childCand |= 1L << e;
             }
         }
+    }
+
+    public List<Long> getMinCoverSets() {
+        return coverNodes.stream().map(nd -> nd.elements).collect(Collectors.toList());
     }
 
 }

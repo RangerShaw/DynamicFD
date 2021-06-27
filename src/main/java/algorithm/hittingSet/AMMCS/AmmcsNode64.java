@@ -7,9 +7,9 @@ import java.util.*;
 
 public class AmmcsNode64 {
 
-    long elements;
-
     long nError;
+
+    long elements;
 
     long cand;
 
@@ -18,7 +18,7 @@ public class AmmcsNode64 {
 
     List<List<Subset>> crit;
 
-    boolean[] canHit;
+    List<Boolean> canHit;
 
 
     private AmmcsNode64() {
@@ -27,7 +27,9 @@ public class AmmcsNode64 {
     /**
      * for initiation only
      */
-    AmmcsNode64(int nElements, List<Subset> setsToCover) {
+    AmmcsNode64(int nElements, List<Subset> setsToCover, long nError) {
+        this.nError = nError;
+
         elements = 0L;
         uncov = new ArrayList<>(setsToCover);
 
@@ -37,27 +39,56 @@ public class AmmcsNode64 {
         for (int i = 0; i < nElements; i++)
             crit.add(new ArrayList<>());
 
-        canHit = new boolean[setsToCover.size()];
-        Arrays.fill(canHit, true);
+        canHit = new ArrayList<>(uncov.size());
+        for (int i = 0; i < uncov.size(); i++)
+            canHit.add(true);
     }
 
     long getCand() {
         return cand;
     }
 
-    boolean isCover() {
-        return nError <= Ammcs64.nMaxError;
+    boolean isCover(long nMaxError) {
+        return nError <= nMaxError;
     }
 
-    public boolean isGlobalMinimal() {
+    public boolean isGlobalMinimal(long nMaxError) {
         for (int e : NumSet.indicesOfOnes(elements)) {
             long newError = nError;
             for (Subset set : crit.get(e))
                 newError += set.count;
-            if (newError <= Ammcs64.nMaxError) return false;
+            if (newError <= nMaxError) return false;
         }
         return true;
     }
+
+    public boolean allCrit() {
+        int e = 0;
+        long ele = elements;
+        while (ele > 0L) {
+            if ((ele & 1) != 0L && crit.get(e).isEmpty()) return false;
+            e++;
+            ele >>>= 1;
+        }
+        return true;
+    }
+
+    Long chooseF() {
+        Long F = null;
+        int nInter = -1;
+
+        for (int i = 0; i < uncov.size(); i++) {
+            if (!canHit.get(i)) continue;
+            int n = Long.bitCount(cand & uncov.get(i).set);
+            if (nInter < n) {
+                nInter = n;
+                F = uncov.get(i).set;
+            }
+        }
+
+        return F;
+    }
+
 
     /**
      * find an uncovered int with the optimal intersection with cand,
@@ -72,6 +103,38 @@ public class AmmcsNode64 {
         return cand & Collections.min(uncov, cmp).set;
     }
 
+    AmmcsNode64 getChildNode(long childCand) {
+        AmmcsNode64 childNode = new AmmcsNode64();
+
+        childNode.elements = elements;
+        childNode.cand = childCand;
+        childNode.nError = nError;
+        childNode.uncov = new ArrayList<>(uncov);
+
+        childNode.crit = new ArrayList<>();
+        for (int i = 0; i < crit.size(); i++)
+            childNode.crit.add(new ArrayList<>(crit.get(i)));
+
+        childNode.canHit = new ArrayList<>(canHit.size());
+        for (int i = 0; i < canHit.size(); i++) {
+            if (canHit.get(i) && (uncov.get(i).set & childCand) != 0) childNode.canHit.add(true);
+            else childNode.canHit.add(false);
+        }
+
+        return childNode;
+    }
+
+    boolean willCover(long nMaxError) {
+        long minNError = nError;
+        for (Subset sb : uncov) {
+            if ((sb.set & cand) != 0) {
+                minNError -= sb.count;
+                if (minNError <= nMaxError) return true;
+            }
+        }
+        return minNError <= nMaxError;
+    }
+
     AmmcsNode64 getChildNode(int e, long childCand) {
         AmmcsNode64 childNode = new AmmcsNode64();
         childNode.cloneContextFromParent(childCand, this);
@@ -82,6 +145,7 @@ public class AmmcsNode64 {
     void cloneContextFromParent(long outerCand, AmmcsNode64 originalNode) {
         elements = originalNode.elements;
         cand = outerCand;
+        nError = originalNode.nError;
 
         crit = new ArrayList<>();
         for (int i = 0; i < originalNode.crit.size(); i++)
@@ -90,10 +154,17 @@ public class AmmcsNode64 {
 
     void updateContextFromParent(int e, AmmcsNode64 parentNode) {
         uncov = new ArrayList<>();
+        canHit = new ArrayList<>();
 
-        for (Subset sb : parentNode.uncov) {
-            if ((sb.set & (1L << e)) != 0) crit.get(e).add(sb);
-            else uncov.add(sb);
+        for (int i=0; i<parentNode.uncov.size(); i++) {
+            Subset sb = parentNode.uncov.get(i);
+            if ((sb.set & (1L << e)) != 0) {
+                crit.get(e).add(sb);
+                nError -= sb.count;
+            } else {
+                uncov.add(sb);
+                canHit.add(parentNode.canHit.get(i));
+            }
         }
 
         for (int u : NumSet.indicesOfOnes(elements))
