@@ -19,5 +19,5 @@ public interface DifferenceSetInterface {
 
     List<? extends Number> getDiffSet();
 
-    HashIntLongMap getDiffFreq();
+    Map<? extends Number, Long> getDiffFreq();
 }

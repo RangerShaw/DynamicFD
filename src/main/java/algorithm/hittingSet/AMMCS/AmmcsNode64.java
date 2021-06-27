@@ -7,8 +7,6 @@ import java.util.*;
 
 public class AmmcsNode64 {
 
-    private int nElements;
-
     long elements;
 
     long nError;
@@ -23,21 +21,17 @@ public class AmmcsNode64 {
     boolean[] canHit;
 
 
-    private AmmcsNode64(int nEle) {
-        nElements = nEle;
+    private AmmcsNode64() {
     }
 
     /**
      * for initiation only
      */
-    AmmcsNode64(int nEle, List<Subset> setsToCover) {
-        nElements = nEle;
+    AmmcsNode64(int nElements, List<Subset> setsToCover) {
         elements = 0L;
         uncov = new ArrayList<>(setsToCover);
 
-        cand = 0L;
-        for (int i = 0; i < nElements; i++)
-            cand |= 1L << i;
+        cand = Ammcs64.elementsMask;
 
         crit = new ArrayList<>(nElements);
         for (int i = 0; i < nElements; i++)
@@ -79,7 +73,7 @@ public class AmmcsNode64 {
     }
 
     AmmcsNode64 getChildNode(int e, long childCand) {
-        AmmcsNode64 childNode = new AmmcsNode64(nElements);
+        AmmcsNode64 childNode = new AmmcsNode64();
         childNode.cloneContextFromParent(childCand, this);
         childNode.updateContextFromParent(e, this);
         return childNode;
@@ -89,8 +83,8 @@ public class AmmcsNode64 {
         elements = originalNode.elements;
         cand = outerCand;
 
-        crit = new ArrayList<>(nElements);
-        for (int i = 0; i < nElements; i++)
+        crit = new ArrayList<>();
+        for (int i = 0; i < originalNode.crit.size(); i++)
             crit.add(new ArrayList<>(originalNode.crit.get(i)));
     }
 

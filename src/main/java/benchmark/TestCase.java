@@ -1,7 +1,6 @@
 package benchmark;
 
 import algorithm.differenceSet.DiffConnector;
-import algorithm.hittingSet.fdConnector.BhmmcsFdConnector;
 import algorithm.hittingSet.fdConnector.BhmmcsFdConnector64;
 import algorithm.hittingSet.fdConnector.FdConnector;
 import me.tongfei.progressbar.ProgressBar;
@@ -12,6 +11,7 @@ import java.util.*;
 import java.util.stream.IntStream;
 
 import static benchmark.DataFp.*;
+import static benchmark.DataFp.REMOVE_INPUT_BASE_DIFF;
 
 public class TestCase {
 
@@ -44,7 +44,25 @@ public class TestCase {
             List<Integer> newDiffs = (List<Integer>) diffConnector.insertData(insertDatas.get(i));
             for (int sb : newDiffs)
                 System.out.println(Utils.intToBitSet(diffConnector.nElements, sb));
-            DataIO.printIntDiffMap(diffConnector.nElements, diffConnector.getDiffFreq(), INSERT_OUTPUT_CURR_DIFF[dataset][i]);
+            DataIO.printLongDiffMap(diffConnector.nElements, (Map<Long, Long>) diffConnector.getDiffFreq(), INSERT_OUTPUT_CURR_DIFF[dataset][i]);
+        });
+    }
+
+    public static void testRemoveDiff(int dataset) {
+        DiffConnector diffConnector = initiateDiff(REMOVE_INPUT_BASE_DATA[dataset], REMOVE_INPUT_BASE_DIFF[dataset]);
+
+        // load inserted data all at once
+        List<List<Integer>> removedDatas = new ArrayList<>();
+        for (String fp : REMOVE_INPUT_DELETED_DATA[dataset])
+            removedDatas.add(DataIO.readRemoveFile(fp));
+
+        // insert data and output diff
+        System.out.println("[REMOVING]...");
+
+        ProgressBar.wrap(IntStream.range(0, removedDatas.size()), "testInsertDiff").forEach(i -> {
+            Set<? extends Number> removedDiffs = diffConnector.removeData(removedDatas.get(i));
+            System.out.println("# of diff "+i+": "+diffConnector.getDiffSet().size());
+            DataIO.printLongDiffMap(diffConnector.nElements, (Map<Long, Long>) diffConnector.getDiffFreq(), REMOVE_OUTPUT_CURR_DIFF[dataset][i]);
         });
     }
 

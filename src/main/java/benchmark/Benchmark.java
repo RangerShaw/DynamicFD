@@ -9,6 +9,7 @@ public class Benchmark {
         TestCase.testRemove(dataset);
         //TestCase.testDiff(dataset);
         //TestCase.testInsertDiff(dataset);
+        //TestCase.testRemoveDiff(dataset);
     }
 
 }

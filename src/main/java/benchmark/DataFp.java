@@ -6,9 +6,10 @@ package benchmark;
 public class DataFp {
 
     /*
-        1   letter
-        2   ...
-        3   ...
+        0   letter
+        1   reduced
+        2   echo
+        3   pitches
     */
 
 
@@ -101,11 +102,15 @@ public class DataFp {
     static String[] REMOVE_INPUT_BASE_DATA = new String[]{
             "dataFiles/letter/remove/letter_20000.csv",
             "dataFiles/reduced/remove/fd-reduced_250000.csv",
+            "",
+            "dataFiles/pitches/remove/2019_pitches_250000.csv"
     };
 
     static String[] REMOVE_INPUT_BASE_DIFF = new String[]{
             "dataFiles/letter/remove/letter_DS_20000.txt",
             "dataFiles/reduced/remove/fd-reduced_DS_250000.csv",
+            "",
+            "dataFiles/pitches/remove/2019_pitches_DS_250000.txt"
     };
     static String[] REMOVE_OUTPUT_BASE_FD = new String[]{
             "dataFiles/letter/remove/letter_FD_20000.txt",
@@ -127,8 +132,37 @@ public class DataFp {
                     "dataFiles/reduced/remove/fd-reduced_219999-210000.csv",
                     "dataFiles/reduced/remove/fd-reduced_209999-200000.csv",
             },
-            // the next dataset file path
+            {
+
+            },
+            {
+                    "dataFiles/pitches/remove/2019_pitchesdel_241667-249999.csv",
+            },
     };
+
+    static String[][] REMOVE_OUTPUT_CURR_DIFF = new String[][]{
+            {
+                    "dataFiles/letter/remove/letter_DS_16000.txt",
+                    "dataFiles/letter/remove/letter_DS_17000.txt",
+                    "dataFiles/letter/remove/letter_DS_18000.txt",
+                    "dataFiles/letter/remove/letter_DS_19000.txt",
+                    "dataFiles/letter/remove/letter_DS_20000.txt"
+            },
+            {
+                    "dataFiles/reduced/remove/fd-reduced_DS_210000.csv",
+                    "dataFiles/reduced/remove/fd-reduced_DS_220000.csv",
+                    "dataFiles/reduced/remove/fd-reduced_DS_230000.csv",
+                    "dataFiles/reduced/remove/fd-reduced_DS_240000.csv",
+                    "dataFiles/reduced/remove/fd-reduced_DS_250000.csv",
+            },
+            {
+
+            },
+            {
+                    "dataFiles/pitches/remove/2019_pitches_DS_241666.csv"
+            }
+    };
+
 
     static String[][] REMOVE_OUTPUT_DELETED_FD = new String[][]{
             {
@@ -172,6 +206,10 @@ public class DataFp {
                     "dataFiles/echo/diff/echocardiogram_80.csv",
                     "dataFiles/echo/diff/echocardiogram_90.csv",
             },
+            {
+                    //"dataFiles/pitches/diff/2019_pitches_241666.csv",
+                    "dataFiles/pitches/diff/2019_pitches_250000.csv"
+            }
     };
 
     static String[][] DIFF_OUTPUT_DIFF = new String[][]{
@@ -195,6 +233,10 @@ public class DataFp {
                     "dataFiles/echo/diff/echocardiogram_DS_70.csv",
                     "dataFiles/echo/diff/echocardiogram_DS_80.csv",
                     "dataFiles/echo/diff/echocardiogram_DS_90.csv",
+            },
+            {
+                    //"dataFiles/pitches/diff/2019_pitches_DS_241666.csv",
+                    "dataFiles/pitches/diff/2019_pitches_DS_250000.csv"
             }
     };
 

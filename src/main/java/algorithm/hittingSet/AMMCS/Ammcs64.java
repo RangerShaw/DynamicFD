@@ -15,13 +15,6 @@ public class Ammcs64 {
 
     static long nMaxError;
 
-    /**
-     * true iff there's an empty int to cover (which could never be covered).
-     * return no cover set if true but walk down without the empty set
-     */
-    boolean hasEmptySubset;
-
-    List<List<Long>> minSubsetParts;
 
     List<AmmcsNode64> coverNodes;
 
@@ -35,11 +28,6 @@ public class Ammcs64 {
     }
 
     public void initiate(List<Subset> subsets) {
-        if (NumSet.removeEmptySubSet(subsets)) hasEmptySubset = true;
-
-        for (int i = 0; i < nElements; i++)
-            minSubsetParts.add(new ArrayList<>());
-
         coverNodes = walkDown(new AmmcsNode64(nElements, subsets));
     }
 

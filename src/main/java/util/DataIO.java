@@ -1,6 +1,5 @@
 package util;
 
-import algorithm.hittingSet.fdConnector.BhmmcsFdConnector;
 import algorithm.hittingSet.fdConnector.FdConnector;
 import com.csvreader.CsvReader;
 
@@ -95,18 +94,18 @@ public class DataIO {
         return differnceSetAll;
     }
 
-    public static void printFDs(BhmmcsFdConnector fdConnector, String writeFilePath, boolean append) {
-        List<List<BitSet>> fd = fdConnector.getMinFDs();
-        for (int i = 0; i < fd.size(); i++) {
-            try (PrintWriter pw = new PrintWriter(new FileWriter(writeFilePath, append))) {
-                pw.println("FDs for attribute " + i + ":");
-                fd.get(i).forEach(pw::println);
-                pw.println();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
+//    public static void printFDs(BhmmcsFdConnector fdConnector, String writeFilePath, boolean append) {
+//        List<List<BitSet>> fd = fdConnector.getMinFDs();
+//        for (int i = 0; i < fd.size(); i++) {
+//            try (PrintWriter pw = new PrintWriter(new FileWriter(writeFilePath, append))) {
+//                pw.println("FDs for attribute " + i + ":");
+//                fd.get(i).forEach(pw::println);
+//                pw.println();
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
 
     public static void printFDs(FdConnector fdConnector, String writeFilePath) {
         List<List<BitSet>> fds = fdConnector.getMinFDs();
@@ -141,6 +140,23 @@ public class DataIO {
         Map<BitSet, Long> map = new HashMap<>();
         for (Map.Entry<Integer, Long> df : diffFreq.entrySet())
             map.put(Utils.intToBitSet(nAttributes, df.getKey()), df.getValue());
+
+        List<Map.Entry<BitSet,Long>> entries = new ArrayList<>(map.entrySet());
+        entries.sort(Utils.BitsetMapComparator());
+
+        try (PrintWriter pw = new PrintWriter(new FileWriter(writeFilePath,false))) {
+            for (var entry : entries) {
+                pw.println(entry);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void printLongDiffMap(int nAttributes, Map<Long, Long> diffFreq, String writeFilePath) {
+        Map<BitSet, Long> map = new HashMap<>();
+        for (Map.Entry<Long, Long> df : diffFreq.entrySet())
+            map.put(Utils.longToBitSet(nAttributes, df.getKey()), df.getValue());
 
         List<Map.Entry<BitSet,Long>> entries = new ArrayList<>(map.entrySet());
         entries.sort(Utils.BitsetMapComparator());

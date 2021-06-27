@@ -56,7 +56,7 @@ public class DiffConnector {
         return differenceSet.getDiffSet();
     }
 
-    public Map<Integer, Long> getDiffFreq() {
+    public Map<? extends Number, Long> getDiffFreq() {
         return differenceSet.getDiffFreq();
     }
 

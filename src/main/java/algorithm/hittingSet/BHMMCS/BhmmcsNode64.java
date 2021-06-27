@@ -26,9 +26,7 @@ public class BhmmcsNode64 {
         elements = 0;
         uncov = new ArrayList<>(setsToCover);
 
-        cand = 0;
-        for (int i = 0; i < nEle; i++)
-            cand |= 1L << i;
+        cand = Bhmmcs64.elementsMask;
 
         crit = new ArrayList<>(nEle);
         for (int i = 0; i < nEle; i++)
