@@ -11,7 +11,7 @@ public class Benchmark {
         //TestCase.testInsertDiff(dataset);
         //TestCase.testRemoveDiff(dataset);
 
-        TestCase.testApp(dataset, 0.01);
+        TestCase.testApp(dataset, 0.001);
     }
 
 }
