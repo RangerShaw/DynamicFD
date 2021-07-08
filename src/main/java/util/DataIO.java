@@ -1,5 +1,6 @@
 package util;
 
+import algorithm.differenceSet.DiffConnector;
 import algorithm.hittingSet.fdConnector.FdConnector;
 import com.csvreader.CsvReader;
 
@@ -153,10 +154,11 @@ public class DataIO {
         }
     }
 
-    public static void printLongDiffMap(int nAttributes, Map<Long, Long> diffFreq, String writeFilePath) {
+    public static void printLongDiffMap(DiffConnector diffConnector, String writeFilePath) {
         Map<BitSet, Long> map = new HashMap<>();
+        Map<Long,Long> diffFreq = (Map<Long, Long>) diffConnector.getDiffFreq();
         for (Map.Entry<Long, Long> df : diffFreq.entrySet())
-            map.put(Utils.longToBitSet(nAttributes, df.getKey()), df.getValue());
+            map.put(Utils.longToBitSet(diffConnector.nElements, df.getKey()), df.getValue());
 
         List<Map.Entry<BitSet,Long>> entries = new ArrayList<>(map.entrySet());
         entries.sort(Utils.BitsetMapComparator());

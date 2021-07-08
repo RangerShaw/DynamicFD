@@ -52,42 +52,42 @@ public class TestCase {
         }
     }
 
-    public static void testInsertDiff(int dataset) {
-        DiffConnector diffConnector = initiateDiff(INSERT_INPUT_BASE_DATA[dataset], INSERT_INPUT_BASE_DIFF[dataset]);
-
-        // load inserted data all at once
-        List<List<List<String>>> insertDatas = new ArrayList<>();
-        for (String fp : INSERT_INPUT_NEW_DATA[dataset])
-            insertDatas.add(DataIO.readCsvFile(fp));
-
-        // insert data and output diff
-        System.out.println("[INSERTING]...");
-
-        ProgressBar.wrap(IntStream.range(0, insertDatas.size()), "testInsertDiff").forEach(i -> {
-            List<Integer> newDiffs = (List<Integer>) diffConnector.insertData(insertDatas.get(i));
-            for (int sb : newDiffs)
-                System.out.println(Utils.intToBitSet(diffConnector.nElements, sb));
-            DataIO.printLongDiffMap(diffConnector.nElements, (Map<Long, Long>) diffConnector.getDiffFreq(), INSERT_OUTPUT_CURR_DIFF[dataset][i]);
-        });
-    }
-
-    public static void testRemoveDiff(int dataset) {
-        DiffConnector diffConnector = initiateDiff(REMOVE_INPUT_BASE_DATA[dataset], REMOVE_INPUT_BASE_DIFF[dataset]);
-
-        // load inserted data all at once
-        List<List<Integer>> removedDatas = new ArrayList<>();
-        for (String fp : REMOVE_INPUT_DELETED_DATA[dataset])
-            removedDatas.add(DataIO.readRemoveFile(fp));
-
-        // insert data and output diff
-        System.out.println("[REMOVING]...");
-
-        ProgressBar.wrap(IntStream.range(0, removedDatas.size()), "testInsertDiff").forEach(i -> {
-            Set<? extends Number> removedDiffs = diffConnector.removeData(removedDatas.get(i));
-            System.out.println("# of diff " + i + ": " + diffConnector.getDiffSet().size());
-            DataIO.printLongDiffMap(diffConnector.nElements, (Map<Long, Long>) diffConnector.getDiffFreq(), REMOVE_OUTPUT_CURR_DIFF[dataset][i]);
-        });
-    }
+//    public static void testInsertDiff(int dataset) {
+//        DiffConnector diffConnector = initiateDiff(INSERT_INPUT_BASE_DATA[dataset], INSERT_INPUT_BASE_DIFF[dataset]);
+//
+//        // load inserted data all at once
+//        List<List<List<String>>> insertDatas = new ArrayList<>();
+//        for (String fp : INSERT_INPUT_NEW_DATA[dataset])
+//            insertDatas.add(DataIO.readCsvFile(fp));
+//
+//        // insert data and output diff
+//        System.out.println("[INSERTING]...");
+//
+//        ProgressBar.wrap(IntStream.range(0, insertDatas.size()), "testInsertDiff").forEach(i -> {
+//            List<Integer> newDiffs = (List<Integer>) diffConnector.insertData(insertDatas.get(i));
+//            for (int sb : newDiffs)
+//                System.out.println(Utils.intToBitSet(diffConnector.nElements, sb));
+//            DataIO.printLongDiffMap(diffConnector.nElements, (Map<Long, Long>) diffConnector.getDiffFreq(), INSERT_OUTPUT_CURR_DIFF[dataset][i]);
+//        });
+//    }
+//
+//    public static void testRemoveDiff(int dataset) {
+//        DiffConnector diffConnector = initiateDiff(REMOVE_INPUT_BASE_DATA[dataset], REMOVE_INPUT_BASE_DIFF[dataset]);
+//
+//        // load inserted data all at once
+//        List<List<Integer>> removedDatas = new ArrayList<>();
+//        for (String fp : REMOVE_INPUT_DELETED_DATA[dataset])
+//            removedDatas.add(DataIO.readRemoveFile(fp));
+//
+//        // insert data and output diff
+//        System.out.println("[REMOVING]...");
+//
+//        ProgressBar.wrap(IntStream.range(0, removedDatas.size()), "testInsertDiff").forEach(i -> {
+//            Set<? extends Number> removedDiffs = diffConnector.removeData(removedDatas.get(i));
+//            System.out.println("# of diff " + i + ": " + diffConnector.getDiffSet().size());
+//            DataIO.printLongDiffMap(diffConnector.nElements, (Map<Long, Long>) diffConnector.getDiffFreq(), REMOVE_OUTPUT_CURR_DIFF[dataset][i]);
+//        });
+//    }
 
 
     public static void testInsert(int dataset) {
@@ -115,6 +115,7 @@ public class TestCase {
             List<? extends Number> newDiffs = diffConnector.insertData(insertDatas.get(i));
             diffTimes.add((double) (System.nanoTime() - startTime) / 1000000);
             insertDiffSets.add(newDiffs);
+            //DataIO.printLongDiffMap(diffConnector,INSERT_OUTPUT_CURR_DIFF[dataset][i]);
 
             // 3.2 update FD
             startTime = System.nanoTime();
@@ -155,13 +156,14 @@ public class TestCase {
             List<? extends Number> leftDiffSet = diffConnector.getDiffSet();
             diffTimes.add((double) (System.nanoTime() - startTime) / 1000000);
             leftDiffSets.add(leftDiffSet);
+            //DataIO.printLongDiffMap(diffConnector,INSERT_OUTPUT_CURR_DIFF[dataset][i]);
 
             // 3.2 update FD
             startTime = System.nanoTime();
             List<List<BitSet>> currFDs = fdConnector.removeSubsets(leftDiffSet, removedDiffs);
             fdTimes.add((double) (System.nanoTime() - startTime) / 1000000);
             totalFds.add(currFDs);
-            //DataIO.printFDs(fdConnector, REMOVE_OUTPUT_DELETED_FD[dataset][i]);
+            DataIO.printFDs(fdConnector, REMOVE_OUTPUT_DELETED_FD[dataset][i]);
         }
 
         // 4 print result and time

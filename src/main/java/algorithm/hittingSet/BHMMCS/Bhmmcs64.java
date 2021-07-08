@@ -106,7 +106,7 @@ public class Bhmmcs64 {
 
     public void removeSubsets(List<Long> leftSubsets, List<Long> rmvdSubsets) {
         if (NumSet.removeEmptyLongSet(leftSubsets)) hasEmptySubset = true;
-        NumSet.removeEmptyLongSet(rmvdSubsets);
+        if (NumSet.removeEmptyLongSet(rmvdSubsets)) hasEmptySubset = false;
 
         // 1 find all min removed subsets from minSubsets and update
         List<Long> minRmvdSubsets = new ArrayList<>();
