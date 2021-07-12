@@ -4,6 +4,7 @@ import algorithm.appDifferenceSet.AppDiffConnector;
 import algorithm.differenceSet.DiffConnector;
 import algorithm.hittingSet.AMMCS.AmmcsFdConnector64;
 import algorithm.hittingSet.AMMCS.Subset;
+import algorithm.hittingSet.MMCSLong.MmcsLong;
 import algorithm.hittingSet.fdConnector.BhmmcsFdConnector64;
 import algorithm.hittingSet.fdConnector.FdConnector;
 import me.tongfei.progressbar.ProgressBar;
@@ -11,12 +12,30 @@ import util.DataIO;
 import util.Utils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static benchmark.DataFp.*;
 import static benchmark.DataFp.REMOVE_INPUT_BASE_DIFF;
 
 public class TestCase {
+
+    public static void testHS(int dataset) {
+        int nAttributes = N_ATTRIBUTES[dataset];
+        System.out.println("No.\tHS\tTime(ms)");
+
+        for (int i = 0; i < HS_INPUT_EDGE[dataset].length; i++) {
+            Map<BitSet, Long> diffSetMap = DataIO.readDiffSetsMap(HS_INPUT_EDGE[dataset][i]);
+            List<Long> diffSet = diffSetMap.keySet().stream().map(bs -> Utils.bitsetToLong(nAttributes, bs)).collect(Collectors.toList());
+
+            long startTime = System.nanoTime();
+            MmcsLong mmcsLong = new MmcsLong(nAttributes);
+            mmcsLong.initiate(diffSet);
+            double totalTime = (double) (System.nanoTime() - startTime) / 1000000;
+
+            System.out.println(i + "\t" + mmcsLong.getMinCoverSets().size() + "\t" +totalTime);
+        }
+    }
 
     public static void testApp(int dataset, double threshold) {
         // load base data
@@ -113,6 +132,7 @@ public class TestCase {
             // 3.1 update pli and differenceSet
             long startTime = System.nanoTime();
             List<? extends Number> newDiffs = diffConnector.insertData(insertDatas.get(i));
+            DataIO.printLongDiffMap(diffConnector, INSERT_OUTPUT_CURR_DIFF[dataset][i]);
             diffTimes.add((double) (System.nanoTime() - startTime) / 1000000);
             insertDiffSets.add(newDiffs);
             //DataIO.printLongDiffMap(diffConnector,INSERT_OUTPUT_CURR_DIFF[dataset][i]);

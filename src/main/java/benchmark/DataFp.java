@@ -14,6 +14,36 @@ public class DataFp {
         5   cab
     */
 
+    static int[] N_ATTRIBUTES = new int[] {
+            17,
+    };
+
+
+    /* test HS */
+
+    static String[][] HS_INPUT_EDGE = new String[][]{
+            {
+                    "dataFiles/letter/hs/letter_DS_15000.csv",
+                    "dataFiles/letter/hs/letter_DS_16000.csv",
+                    "dataFiles/letter/hs/letter_DS_17000.csv",
+                    "dataFiles/letter/hs/letter_DS_18000.csv",
+                    "dataFiles/letter/hs/letter_DS_19000.csv",
+                    "dataFiles/letter/hs/letter_DS_20000.csv",
+            },
+    };
+
+    static String[][] HS_OUTPUT_HS = new String[][]{
+            {
+                    "dataFiles/letter/hs/letter_HS_15000.csv",
+                    "dataFiles/letter/hs/letter_HS_16000.csv",
+                    "dataFiles/letter/hs/letter_HS_17000.csv",
+                    "dataFiles/letter/hs/letter_HS_18000.csv",
+                    "dataFiles/letter/hs/letter_HS_19000.csv",
+                    "dataFiles/letter/hs/letter_HS_20000.csv",
+            },
+    };
+
+
 
     /* test INSERT */
 

@@ -143,6 +143,18 @@ public class NumSet {
         return true;
     }
 
+    public static boolean removeEmptyLongSetUnsorted(List<Long> sets) {
+        boolean hasEmptySubset = false;
+        for (int i = 0; i < sets.size(); i++) {
+            if (sets.get(i) == 0) {
+                hasEmptySubset = true;
+                sets.remove(i);
+                break;
+            }
+        }
+        return hasEmptySubset;
+    }
+
     public static boolean removeEmptySubSet(List<Subset> sets) {
         // sets should be sorted already
         if (sets.isEmpty() || sets.get(0).set != 0) return false;
