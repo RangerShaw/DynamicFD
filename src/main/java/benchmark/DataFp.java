@@ -14,25 +14,56 @@ public class DataFp {
         5   cab
     */
 
-    static int[] N_ATTRIBUTES = new int[] {
+    static int[] N_ATTRIBUTES = new int[]{
             17,
     };
 
 
-    /* test HS */
+    /* test MMCS and BHMMCS */
 
-    static String[][] HS_INPUT_EDGE = new String[][]{
+    static String[][] MMCS_INPUT_EDGE = new String[][]{
             {
-                    "dataFiles/letter/hs/letter_DS_15000.csv",
-                    "dataFiles/letter/hs/letter_DS_16000.csv",
-                    "dataFiles/letter/hs/letter_DS_17000.csv",
-                    "dataFiles/letter/hs/letter_DS_18000.csv",
-                    "dataFiles/letter/hs/letter_DS_19000.csv",
-                    "dataFiles/letter/hs/letter_DS_20000.csv",
+                    "dataFiles/hs/_left95.txt",
+                    "dataFiles/hs/_left90.txt",
+                    "dataFiles/hs/_left85.txt",
+                    "dataFiles/hs/_left80.txt",
             },
     };
 
-    static String[][] HS_OUTPUT_HS = new String[][]{
+    static String[][] MMCS_OUTPUT_HS = new String[][]{
+            {
+                    "dataFiles/letter/hs/letter_HS_15000.csv",
+                    "dataFiles/letter/hs/letter_HS_16000.csv",
+                    "dataFiles/letter/hs/letter_HS_17000.csv",
+                    "dataFiles/letter/hs/letter_HS_18000.csv",
+                    "dataFiles/letter/hs/letter_HS_19000.csv",
+                    "dataFiles/letter/hs/letter_HS_20000.csv",
+            },
+    };
+
+    static String[] BHMMCS_INPUT_BASE_EDGE = new String[]{
+            "dataFiles/hs/letter_100.txt",
+    };
+
+    static String[][] BHMMCS_INPUT_RMVD_EDGE = new String[][]{
+            {
+                    "dataFiles/hs/_remove_95.txt",
+                    "dataFiles/hs/_remove_90.txt",
+                    "dataFiles/hs/_remove_85.txt",
+                    "dataFiles/hs/_remove_80.txt",
+            },
+    };
+
+    static String[][] BHMMCS_INPUT_LEFT_EDGE = new String[][]{
+            {
+                    "dataFiles/hs/_left95.txt",
+                    "dataFiles/hs/_left90.txt",
+                    "dataFiles/hs/_left85.txt",
+                    "dataFiles/hs/_left80.txt",
+            },
+    };
+
+    static String[][] BHMMCS_OUTPUT_HS = new String[][]{
             {
                     "dataFiles/letter/hs/letter_HS_15000.csv",
                     "dataFiles/letter/hs/letter_HS_16000.csv",

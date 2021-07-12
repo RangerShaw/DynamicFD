@@ -12,7 +12,8 @@ public class Benchmark {
         //TestCase.testRemoveDiff(dataset);
 
         //TestCase.testApp(dataset, 0.001);
-        TestCase.testHS(dataset);
+        //TestCase.testMMCS(dataset);
+        TestCase.testBHMMCS(dataset);
     }
 
 }

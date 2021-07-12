@@ -120,7 +120,7 @@ public class Bhmmcs64 {
         minSubsets.addAll(minExposedSets);
         NumSet.sortLongSets(nElements, minSubsets);
 
-        // 3 remove subsets from nodes' crit and walk up if some crit is empty
+        // 3 remove affected vertices from nodes
         coverNodes = walkUp(minRmvdSubsets, minRemoved);
 
         // 4 find all coverNode that intersect with minRemoved and re-walk

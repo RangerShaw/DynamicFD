@@ -4,28 +4,27 @@ import algorithm.appDifferenceSet.AppDiffConnector;
 import algorithm.differenceSet.DiffConnector;
 import algorithm.hittingSet.AMMCS.AmmcsFdConnector64;
 import algorithm.hittingSet.AMMCS.Subset;
+import algorithm.hittingSet.BHMMCS.Bhmmcs64;
 import algorithm.hittingSet.MMCSLong.MmcsLong;
 import algorithm.hittingSet.fdConnector.BhmmcsFdConnector64;
 import algorithm.hittingSet.fdConnector.FdConnector;
-import me.tongfei.progressbar.ProgressBar;
 import util.DataIO;
 import util.Utils;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static benchmark.DataFp.*;
 import static benchmark.DataFp.REMOVE_INPUT_BASE_DIFF;
 
 public class TestCase {
 
-    public static void testHS(int dataset) {
+    public static void testMMCS(int dataset) {
         int nAttributes = N_ATTRIBUTES[dataset];
         System.out.println("No.\tHS\tTime(ms)");
 
-        for (int i = 0; i < HS_INPUT_EDGE[dataset].length; i++) {
-            Map<BitSet, Long> diffSetMap = DataIO.readDiffSetsMap(HS_INPUT_EDGE[dataset][i]);
+        for (int i = 0; i < MMCS_INPUT_EDGE[dataset].length; i++) {
+            Map<BitSet, Long> diffSetMap = DataIO.readDiffSetsMap(MMCS_INPUT_EDGE[dataset][i]);
             List<Long> diffSet = diffSetMap.keySet().stream().map(bs -> Utils.bitsetToLong(nAttributes, bs)).collect(Collectors.toList());
 
             long startTime = System.nanoTime();
@@ -189,6 +188,30 @@ public class TestCase {
         // 4 print result and time
         printResult(false, leftDiffSets, totalFds, diffTimes, fdTimes);
     }
+
+    public static void testBHMMCS(int dataset) {
+        int nAttributes = N_ATTRIBUTES[dataset];
+
+        Map<BitSet, Long> diffSetMap = DataIO.readDiffSetsMap(BHMMCS_INPUT_BASE_EDGE[dataset]);
+        List<Long> diffSet = diffSetMap.keySet().stream().map(bs -> Utils.bitsetToLong(nAttributes, bs)).collect(Collectors.toList());
+
+        Bhmmcs64 bhmmcs64 = new Bhmmcs64(nAttributes);
+        bhmmcs64.initiate(diffSet);
+
+        System.out.println("No.\tHS\tTime(ms)");
+
+        for (int i = 0; i < BHMMCS_INPUT_LEFT_EDGE[dataset].length; i++) {
+            List<Long> left = DataIO.readDiffSetsMap(BHMMCS_INPUT_LEFT_EDGE[dataset][i]).keySet().stream().map(bs -> Utils.bitsetToLong(nAttributes, bs)).collect(Collectors.toList());
+            List<Long> rmvd = DataIO.readDiffSetsMap(BHMMCS_INPUT_RMVD_EDGE[dataset][i]).keySet().stream().map(bs -> Utils.bitsetToLong(nAttributes, bs)).collect(Collectors.toList());
+
+            long startTime = System.nanoTime();
+            bhmmcs64.removeSubsets(left,rmvd);
+            double totalTime = (double) (System.nanoTime() - startTime) / 1000000;
+
+            System.out.println(i + "\t" + bhmmcs64.getMinCoverSets().size() + "\t" +totalTime);
+        }
+    }
+
 
     static DiffConnector initiateDiff(String BASE_DATA_INPUT, String BASE_DIFF_INPUT) {
         // load base data
